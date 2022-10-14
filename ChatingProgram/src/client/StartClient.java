@@ -70,7 +70,7 @@ public class StartClient {
 			startClient.receive();			
 			
 			System.out.println("--------------------------------------------------");
-			System.out.println("보낼 메시지를 입력하고 Enter");
+			System.out.println("보낼 메시지를 입력하고 Enter test");
 			System.out.println("채팅를 종료하려면 q를 입력하고 Enter");
 			System.out.println("--------------------------------------------------");
 			while(true) {
