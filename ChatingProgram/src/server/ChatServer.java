@@ -97,7 +97,7 @@ public class ChatServer {
 			serverSocket.close();
 			threadPool.shutdownNow();
 			chatRoom.values().stream().forEach(sc -> sc.close());
-			System.out.println( "[서버] 종료됨 ");
+			System.out.println( "[서버] 종료됨??? ");
 		} catch (IOException e1) {}
 	}
 	
