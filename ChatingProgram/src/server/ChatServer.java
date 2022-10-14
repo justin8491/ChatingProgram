@@ -103,7 +103,11 @@ public class ChatServer {
 		}
 	catch(Exception e) {e.getStackTrace();}}
 	FileOutputStream fos=new FileOutputStream("c:\\down\\"+fileName);
-	
+	byte[] b=new byte[1024];
+	int n=0;
+	while((n=dis.read(b))!=-1) {
+		fos.write(b,0,n);
+	}
 	
 	fos.close();
 	dis.close();
