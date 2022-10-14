@@ -139,7 +139,7 @@ public class StartServer {
 			startServer.start();
 			
 			System.out.println("----------------------------------------------------");
-			System.out.println("서버를 종료하려면 q를 입력하고 Enteraadfszxczxfsdf");
+			System.out.println("서버를 종료하려면 q를 입력하고 Enteraadfszxczxfsdvdv12w2321df");
 			System.out.println("----------------------------------------------------");
 			
 			Scanner scanner = new Scanner(System.in);
