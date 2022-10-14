@@ -8,86 +8,139 @@ import java.net.Socket;
 
 import org.json.JSONObject;
 
-public class SocketClient {
+import lombok.Builder;
+import lombok.Data;
+import member.Member;
 
-	StartServer startServer;
+
+public class SocketClient {
+	//필드
+	ChatServer chatServer;
 	Socket socket;
 	DataInputStream dis;
 	DataOutputStream dos;
-	String clientIp;
+	String clientIp;	
 	String chatName;
-
-	public SocketClient(StartServer startServer, Socket socket) {
-
+	
+	//생성자
+	public SocketClient(ChatServer chatServer, Socket socket) {
 		try {
-			this.startServer = startServer;
+			this.chatServer = chatServer;
 			this.socket = socket;
 			this.dis = new DataInputStream(socket.getInputStream());
 			this.dos = new DataOutputStream(socket.getOutputStream());
-			
-			//InetSocketAddress 로 실행한 클라이언트 주소 받기
 			InetSocketAddress isa = (InetSocketAddress) socket.getRemoteSocketAddress();
-			this.clientIp = isa.getHostName();
-			
+			this.clientIp = isa.getHostName();			
 			receive();
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch(IOException e) {
 		}
-
-	}
-
-	private void receive() {
-		// TODO Auto-generated method stub
-		startServer.threadPool.execute(()->{
+	}	
+	//메소드: JSON 받기
+	public void receive() {
+		chatServer.threadPool.execute(() -> {
 			try {
-				while (true) {
-					String receiveJson = dis.readUTF();
+				boolean stop = false;
+				while(true != stop) {
+					String receiveJson = dis.readUTF();		
 					
 					JSONObject jsonObject = new JSONObject(receiveJson);
 					String command = jsonObject.getString("command");
 					
-					switch (command) {
-					case "incoming":
-						this.chatName = jsonObject.getString("data");
-						startServer.sendToAll(this, "님이 들어오셨습니다.");
-						startServer.addSocketClient(this);
-						
-						break;
-
-					case "message":
-						String message = jsonObject.getString("data");
-						startServer.sendToAll(this, message);
-						
-						break;
-					}
+					/*
+					입장 : incoming,이름
+					{command:incoming, data:'홍길동'}
 					
+					 채팅 : message,내용
+					{command:message, data:'안녕'}
+					
+					*/
+					switch(command) {
+						case "login":
+							login(jsonObject);
+							stop = true;
+							break;
+						case "passwdSearch":
+							passwdSearch(jsonObject);
+							stop = true;
+							break;
+						
+						case "incoming":
+							this.chatName = jsonObject.getString("data");
+							chatServer.sendToAll(this, "들어오셨습니다.");
+							chatServer.addSocketClient(this);
+							break;
+						case "message":
+							String message = jsonObject.getString("data");
+							chatServer.sendToAll(this, message);
+							break;
+					}
 				}
-			} catch (IOException e) {
-				// TODO: handle exception
-				startServer.sendToAll(this, "님이 나가셨습니다.");
-				//startServer
+			} catch(IOException e) {
+				e.printStackTrace();
+				chatServer.sendToAll(this, "나가셨습니다.");
+				chatServer.removeSocketClient(this);
 			}
 		});
 	}
-
-	// JSON 보내기
 	
+	private void login(JSONObject jsonObject) {
+		String uid = jsonObject.getString("uid");
+		String pwd = jsonObject.getString("pwd");
+		JSONObject jsonResult = new JSONObject();
+		
+		jsonResult.put("statusCode", "-1");
+		jsonResult.put("message", "로그인 아이디가 존재하지 않습니다");
+		
+		try {
+			member.Member member = chatServer.findByUid(uid);
+			if (null != member && pwd.equals(member.getPwd())) {
+				jsonResult.put("statusCode", "0");
+				jsonResult.put("message", "로그인 성공");
+			}
+		} catch (Member.NotExistUidPwd e) {
+			e.printStackTrace();
+		}
+
+		send(jsonResult.toString());
+		
+		close();
+	}
+	
+	private void passwdSearch(JSONObject jsonObject) {
+		String uid = jsonObject.getString("uid");
+		JSONObject jsonResult = new JSONObject();
+		
+		jsonResult.put("statusCode", "-1");
+		jsonResult.put("message", "로그인 아이디가 존재하지 않습니다");
+		
+		try {
+			Member member = chatServer.findByUid(uid);
+			if (null != member) {
+				jsonResult.put("statusCode", "0");
+				jsonResult.put("message", "비밀번호 찾기 성공");
+				jsonResult.put("pwd", member.getPwd());
+			}
+		} catch (Member.NotExistUidPwd e) {
+			e.printStackTrace();
+		}
+				
+		send(jsonResult.toString());
+		
+		close();
+	}
+	
+	//메소드: JSON 보내기
 	public void send(String json) {
 		try {
 			dos.writeUTF(json);
 			dos.flush();
-		} catch (IOException e) {}
-	}
-	
+		} catch(IOException e) {
+		}
+	}	
+	//메소드: 연결 종료
 	public void close() {
-		try {
+		try { 
 			socket.close();
-		} catch (Exception e) {}
+		} catch(Exception e) {}
 	}
-	
-	
-	
-
 }
