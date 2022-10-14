@@ -62,13 +62,30 @@ public class ChatServer {
 		System.out.println("나감: " + key);
 		System.out.println("현재 채팅자 수: " + chatRoom.size() + "\n");
 	}		
-	//메소드: 모든 클라이언트에게 메시지 보냄
+	//메소드: 모든 클라이언트에게 메시지 보냄 + 귓속말
 	public void sendToAll(SocketClient sender, String message) {
 		JSONObject root = new JSONObject();
 		root.put("clientIp", sender.clientIp);
 		root.put("chatName", sender.chatName);
 		root.put("message", message);
 		String json = root.toString();
+		
+		// 귓속말 조건
+		if(message.indexOf("/") == 0) {
+			int pos = message.indexOf(" ");
+			String key = message.substring(1, pos); // chatName 타겟 키
+			message = "(귓)" + message.substring(pos+1);
+			
+			//타겟 닉네임
+			//소켓 클라이언트 변수에 채팅방 values를 대입
+			for(SocketClient socketClient : chatRoom.values()) {
+				//소켓 클라이언트에 멤버변수인 chatName에 key값(해당이름)이 있을 경우
+				if(socketClient.chatName.equals(key)) {
+					socketClient.send(json);
+				}
+			}
+		}
+		
 		
 		chatRoom.values().stream()
 		.filter(socketClient -> socketClient != sender)
