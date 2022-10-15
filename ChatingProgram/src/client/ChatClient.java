@@ -1,11 +1,13 @@
 package client;
 
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -157,8 +159,8 @@ public class ChatClient {
 			dos.writeUTF(f.getName());
 			dos.flush();
 			FileInputStream fis = new FileInputStream(fileName);
-			int n=0;
-			byte b[]=new byte[1024];
+			int n = 0;
+			byte b[] = new byte[1024];
 			while ((n = fis.read(b)) != -1) {
 				dos.write(b, 0, n);
 			}
@@ -174,20 +176,46 @@ public class ChatClient {
 		}
 	}
 
-	public void downloadName(Scanner scanner) {
-		System.out.println("파일명을 입력하세요:");
+public void fileDownload(Scanner scanner) throws IOException {
+	 Socket sock = new Socket("localhost",9999);
+	 ChatServer chatServer = new ChatServer();
+	 chatServer.files();
+	 DataInputStream dis = new DataInputStream(sock.getInputStream());
+	 System.out.println("파일명을 입력하세요:");
 		String fileName = scanner.next();
-		String path = "c:\\down\\";
-		String file = path + fileName;
-		System.out.println(file + "을 다운로드 합니다");
+		File f = new File(fileName);
+		DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
+		dos.writeUTF(f.getName());
+		dos.flush();
+		String path = "c:\\chatdown\\";
+		File Folder = new File(path);
+		if (!Folder.exists()) {
+			try {
+				Folder.mkdir();
+			} catch (Exception e) {
+				e.getStackTrace();
+			}
+		}
+		FileOutputStream fos = new FileOutputStream(path + fileName);
+		byte[] b = new byte[1024];
+		int n = 0;
+		while ((n = dis.read(b)) != -1) {
+			fos.write(b, 0, n);
+		}
+		fos.close();
+		dis.close();
+		sock.close();
+		System.out.println("파일수신 완료");
+
 	}
+			
 
 	// 메소드: 메인
 	public static void main(String[] args) {
 		try {
 			ChatClient chatClient = new ChatClient();
 			boolean stop = false;
-			ChatServer chatServer = new ChatServer();
+			
 			while (false == stop) {
 				System.out.println();
 				System.out.println("1. 로그인");
@@ -213,8 +241,7 @@ public class ChatClient {
 					chatClient.fileUpload(scanner);
 					break;
 				case "5":
-					chatServer.files();
-					chatClient.downloadName(scanner);
+					chatClient.fileDownload(scanner);
 					break;
 				case "Q", "q":
 					scanner.close();
