@@ -176,12 +176,12 @@ public class ChatClient {
 		}
 	}
 
-public void fileDownload(Scanner scanner) throws IOException {
-	 Socket sock = new Socket("localhost",9999);
-	 ChatServer chatServer = new ChatServer();
-	 chatServer.files();
-	 DataInputStream dis = new DataInputStream(sock.getInputStream());
-	 System.out.println("파일명을 입력하세요:");
+	public void fileDownload(Scanner scanner) throws IOException {
+		Socket sock = new Socket("localhost", 9999);
+		ChatServer chatServer = new ChatServer();
+		chatServer.files();
+		DataInputStream dis = new DataInputStream(sock.getInputStream());
+		System.out.println("파일명을 입력하세요:");
 		String fileName = scanner.next();
 		File f = new File(fileName);
 		DataOutputStream dos = new DataOutputStream(sock.getOutputStream());
@@ -208,14 +208,24 @@ public void fileDownload(Scanner scanner) throws IOException {
 		System.out.println("파일수신 완료");
 
 	}
-			
+
+	private void createChatRoom() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void readChatRoom() {
+		// TODO Auto-generated method stub
+
+	}
 
 	// 메소드: 메인
 	public static void main(String[] args) {
 		try {
 			ChatClient chatClient = new ChatClient();
 			boolean stop = false;
-			
+			boolean logon = false;
+
 			while (false == stop) {
 				System.out.println();
 				System.out.println("1. 로그인");
@@ -230,6 +240,7 @@ public void fileDownload(Scanner scanner) throws IOException {
 				switch (menuNum) {
 				case "1":
 					chatClient.login(scanner);
+					logon = true;
 					break;
 				case "2":
 					chatClient.registerMember(scanner);
@@ -249,41 +260,47 @@ public void fileDownload(Scanner scanner) throws IOException {
 					System.out.println("프로그램 종료됨");
 					break;
 				}
+				if (logon == true) {
+					System.out.println();
+					System.out.println("1. 채팅방 생성");
+					System.out.println("2. 채팅방 목록");
+					System.out.println("3. 파일업로드");
+					System.out.println("4. 서버파일목록");
+					System.out.println("q. 프로그램 종료");
+					System.out.print("메뉴 선택 => ");
+					scanner = new Scanner(System.in);
+					menuNum = scanner.nextLine();
+					switch (menuNum) {
+					case "1":
+						chatClient.createChatRoom();
+						break;
+					case "2":
+						chatClient.readChatRoom();
+						break;
+					case "3":
+						chatClient.fileUpload(scanner);
+						break;
+					case "4":
+						chatClient.fileDownload(scanner);
+						break;
+					case "Q", "q":
+						scanner.close();
+						stop = true;
+						System.out.println("프로그램 종료됨");
+						break;
+					}
+				}
+
 			}
 
-//			ChatClient chatClient = new ChatClient();
-//			chatClient.connect();
-//			System.out.println("대화명 입력: ");
-//			chatClient.chatName = scanner.nextLine();
-//			
-//			JSONObject jsonObject = new JSONObject();
-//			jsonObject.put("command", "incoming");
-//			jsonObject.put("data", chatClient.chatName);
-//			String json = jsonObject.toString();
-//			chatClient.send(json);
-//			
-//			chatClient.receive();			
-//			
-//			System.out.println("--------------------------------------------------");
-//			System.out.println("보낼 메시지를 입력하고 Enter");
-//			System.out.println("채팅를 종료하려면 q를 입력하고 Enter");
-//			System.out.println("--------------------------------------------------");
-//			while(true) {
-//				String message = scanner.nextLine();
-//				if(message.toLowerCase().equals("q")) {
-//					break;
-//				} else {
-////					jsonObject = new JSONObject();
-//					jsonObject.put("command", "message");
-//					jsonObject.put("data", message);
-//					chatClient.send(jsonObject.toString());
-//				}
-//			}
-//			scanner.close();
-//			chatClient.unconnect();
+			while (true == logon && false == stop) {
+
+			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("[클라이언트] 서버 연결 안됨");
 		}
 	}
+
 }

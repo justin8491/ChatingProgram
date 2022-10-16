@@ -14,6 +14,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
@@ -28,7 +29,14 @@ public class ChatServer {
 	static // 필드
 	ServerSocket serverSocket;
 	ExecutorService threadPool = Executors.newFixedThreadPool(100);
+	
+	//채팅방 묶음 리스트
+	//LinkedList<Map<String, SocketClient>> chatProgram = (LinkedList<Map<String, SocketClient>>) Collections.synchronizedMap(new HashMap<>());
+	//채팅방
 	Map<String, SocketClient> chatRoom = Collections.synchronizedMap(new HashMap<>());
+	
+	
+	
 	MemberRepository memberRepository = new MemberRepository();
 
 	// 메소드: 서버 시작
@@ -90,7 +98,6 @@ public class ChatServer {
 				}
 			}
 		}
-
 		chatRoom.values().stream().filter(socketClient -> socketClient != sender)
 				.forEach(socketClient -> socketClient.send(json));
 	}

@@ -93,7 +93,7 @@ public class SocketClient {
 		
 		try {
 			member.Member member = chatServer.findByUid(uid);
-			if (null != member && pwd.equals(member.getPwd())) {
+			if (null != member && pwd.equals(member.Pwd())) {
 				jsonResult.put("statusCode", "0");
 				jsonResult.put("message", "로그인 성공");
 			}
@@ -118,7 +118,7 @@ public class SocketClient {
 			if (null != member) {
 				jsonResult.put("statusCode", "0");
 				jsonResult.put("message", "비밀번호 찾기 성공");
-				jsonResult.put("pwd", member.getPwd());
+				jsonResult.put("pwd", member.Pwd());
 			}
 		} catch (Member.NotExistUidPwd e) {
 			e.printStackTrace();
