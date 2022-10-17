@@ -208,19 +208,16 @@ public class ChatClient {
 		System.out.println("파일수신 완료");
 
 	}
-	
-	private void userChangeInfo() {
+
+	private void createChatRoom() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
-	private void joinChatRoom() {
+	private void readChatRoom() {
 		// TODO Auto-generated method stub
-		
-	}
-	
 
-	
+	}
 
 	// 메소드: 메인
 	public static void main(String[] args) {
@@ -230,42 +227,6 @@ public class ChatClient {
 			boolean logon = false;
 
 			while (false == stop) {
-				Scanner scanner = new Scanner(System.in);
-				String menuNum = scanner.nextLine();
-				
-				
-				//로그인 성공 시
-				if (logon == true) {
-					
-					System.out.println();
-					System.out.println("1. 채팅방 입장");
-					System.out.println("2. 회원정보 변경");
-					System.out.println("3. 파일 업로드");
-					System.out.println("4. 파일 다운로드");
-					System.out.println("q. 프로그램 종료");
-					System.out.print("메뉴 선택 => ");
-					menuNum = scanner.nextLine();
-					switch (menuNum) {
-					case "1":
-						chatClient.joinChatRoom();
-						break;
-					case "2":
-						chatClient.userChangeInfo();
-						break;
-					case "3":
-						chatClient.fileUpload(scanner);
-						break;
-					case "4":
-						chatClient.fileDownload(scanner);
-						break;
-					case "Q", "q":
-						scanner.close();
-						stop = true;
-						System.out.println("프로그램 종료됨");
-						break;
-					}
-				}
-				
 				System.out.println();
 				System.out.println("1. 로그인");
 				System.out.println("2. 회원가입");
@@ -274,7 +235,8 @@ public class ChatClient {
 				System.out.println("5. 서버파일목록");
 				System.out.println("q. 프로그램 종료");
 				System.out.print("메뉴 선택 => ");
-
+				Scanner scanner = new Scanner(System.in);
+				String menuNum = scanner.nextLine();
 				switch (menuNum) {
 				case "1":
 					chatClient.login(scanner);
@@ -298,9 +260,36 @@ public class ChatClient {
 					System.out.println("프로그램 종료됨");
 					break;
 				}
-				
-				
-				
+				if (logon == true) {
+					System.out.println();
+					System.out.println("1. 채팅방 생성");
+					System.out.println("2. 채팅방 목록");
+					System.out.println("3. 파일업로드");
+					System.out.println("4. 서버파일목록");
+					System.out.println("q. 프로그램 종료");
+					System.out.print("메뉴 선택 => ");
+					scanner = new Scanner(System.in);
+					menuNum = scanner.nextLine();
+					switch (menuNum) {
+					case "1":
+						chatClient.createChatRoom();
+						break;
+					case "2":
+						chatClient.readChatRoom();
+						break;
+					case "3":
+						chatClient.fileUpload(scanner);
+						break;
+					case "4":
+						chatClient.fileDownload(scanner);
+						break;
+					case "Q", "q":
+						scanner.close();
+						stop = true;
+						System.out.println("프로그램 종료됨");
+						break;
+					}
+				}
 
 			}
 
@@ -313,7 +302,5 @@ public class ChatClient {
 			System.out.println("[클라이언트] 서버 연결 안됨");
 		}
 	}
-
-	
 
 }

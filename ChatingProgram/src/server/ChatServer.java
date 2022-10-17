@@ -42,10 +42,10 @@ public class ChatServer {
 	// 메소드: 서버 시작
 	public void start() throws IOException {
 
-		memberRepository.loadMember();
+		//memberRepository.loadMember();
 
 		serverSocket = new ServerSocket(50001);
-		System.out.println("[서버] 시작됨test");
+		System.out.println("[서버] 시작됨");
 
 		Thread thread = new Thread(() -> {
 			try {
