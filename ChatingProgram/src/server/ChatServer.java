@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import member.Member;
 import member.MemberRepository;
 
+
 public class ChatServer {
 	static //필드
 	ServerSocket serverSocket;
@@ -34,7 +35,7 @@ public class ChatServer {
 		memberRepository.loadMember();
 		
 		serverSocket = new ServerSocket(50001);	
-		System.out.println( "[서버] 시작됨test");
+		System.out.println( "[서버] 시작됨");
 		
 		Thread thread = new Thread(() -> {
 			try {
@@ -159,6 +160,7 @@ public class ChatServer {
 			ChatServer chatServer = new ChatServer();
 			chatServer.start();
 			
+			
 			System.out.println("----------------------------------------------------");
 			System.out.println("서버를 종료하려면 q를 입력하고 Enter.");
 			System.out.println("----------------------------------------------------");
@@ -174,6 +176,8 @@ public class ChatServer {
 			chatServer.stop();
 		} catch(IOException e) {
 			System.out.println("[서버] " + e.getMessage());
+			//타겟 닉네임 서버에 로그인 출력
+			//System.out.println("[서버] " + chat);
 		}
 	}
 }
