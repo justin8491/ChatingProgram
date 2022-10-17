@@ -5,6 +5,9 @@ import java.util.Objects;
 
 import org.json.JSONObject;
 
+import lombok.Data;
+
+@Data
 public class Member implements Serializable{
 	/**
 	 * 
