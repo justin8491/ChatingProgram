@@ -5,8 +5,9 @@ import java.util.Objects;
 
 import org.json.JSONObject;
 
+import lombok.Builder;
 import lombok.Data;
-
+@Builder
 @Data
 public class Member implements Serializable{
 	/**
@@ -20,10 +21,11 @@ public class Member implements Serializable{
 	private String phone;
 	private String email;
 	private String sex;
+	private String address;
   	// 각각의 아이디 페스워드는 외부에서 접근할 수 없도록
   	// 접근제어자 private 을 주어 해당 클레스에서만 접근할 수 있도록 했습니다.
 	
-	public Member(String uid, String pwd, String name, String phone, String email, String sex) 
+	public Member(String uid, String pwd, String name, String phone, String email, String sex, String address) 
 	{
 		this.uid = uid;
 		this.pwd = pwd;
@@ -31,6 +33,7 @@ public class Member implements Serializable{
 		this.email = email;
 		this.phone = phone;
 		this.sex = sex;
+		this.address = address;
 	}
   	// Member 생성자를 this를 사용하여 초기화 해주었습니다.
 	
@@ -41,6 +44,7 @@ public class Member implements Serializable{
 		sex = jsonObject.getString("sex");
 		email = jsonObject.getString("email");
 		phone = jsonObject.getString("phone");
+		address = jsonObject.getString("address");
 	}
 	
 	
