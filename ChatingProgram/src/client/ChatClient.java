@@ -105,10 +105,10 @@ public class ChatClient {
 		String sex;
 		String address;
 		String phone;
-		String email;
+		//String email;
 		
 		try {
-			
+			System.out.println("registerMember 성공");
 			System.out.print("아이디 : ");
 			uid = scanner.nextLine();
 			System.out.print("비번 : ");
@@ -121,11 +121,10 @@ public class ChatClient {
 			address = scanner.nextLine();
 			System.out.print("전화번호 : ");
 			phone = scanner.nextLine();
-			System.out.print("이메일 : ");
-			email = scanner.nextLine();
+//			System.out.print("이메일 : ");
+//			email = scanner.nextLine();
 
 			connect();
-			
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("command", "registerMember");
 			jsonObject.put("uid", uid);
@@ -134,10 +133,10 @@ public class ChatClient {
 			jsonObject.put("sex", sex);
 			jsonObject.put("address", address);
 			jsonObject.put("phone", phone);
-			jsonObject.put("email", email);
+//			jsonObject.put("email", email);
 			String json = jsonObject.toString();
 			send(json);
-			
+			System.out.println(json);
 			registerMemberResponse();
 			
 			disconnect();
@@ -148,16 +147,16 @@ public class ChatClient {
 	}
 		
 		
-    public void registerMemberResponse() throws Exception {
+    public void registerMemberResponse() throws Exception, NoClassDefFoundError, IOException {
         String json = dis.readUTF();
         JSONObject root = new JSONObject(json);
         String statusCode = root.getString("statusCode");
         String message = root.getString("message");
-        
         if (statusCode.equals("0")) {
-            System.out.println("회원가입성공");
+            System.out.println("회원가입 성공");
         } else {
             System.out.println(message);
+            System.out.println("회원가입 실패");
         }
     }
     
