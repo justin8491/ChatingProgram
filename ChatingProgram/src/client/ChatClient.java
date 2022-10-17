@@ -2,18 +2,11 @@ package client;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.Scanner;
 
 import org.json.JSONObject;
-
-import server.ChatServer;
 
 public class ChatClient {
 	//필드
@@ -106,7 +99,67 @@ public class ChatClient {
 	
 	public void registerMember(Scanner scanner) {
 		
+		String uid;
+		String pwd;
+		String name;
+		String sex;
+		String address;
+		String phone;
+		//String email;
+		
+		try {
+			System.out.println("registerMember 성공");
+			System.out.print("아이디 : ");
+			uid = scanner.nextLine();
+			System.out.print("비번 : ");
+			pwd = scanner.nextLine();
+			System.out.print("이름 : ");
+			name = scanner.nextLine();
+			System.out.print("성별[남자(M)/여자(F)] : ");
+			sex = scanner.nextLine();		
+			System.out.print("주소 : ");
+			address = scanner.nextLine();
+			System.out.print("전화번호 : ");
+			phone = scanner.nextLine();
+//			System.out.print("이메일 : ");
+//			email = scanner.nextLine();
+
+			connect();
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("command", "registerMember");
+			jsonObject.put("uid", uid);
+			jsonObject.put("pwd", pwd);
+			jsonObject.put("name", name);
+			jsonObject.put("sex", sex);
+			jsonObject.put("address", address);
+			jsonObject.put("phone", phone);
+//			jsonObject.put("email", email);
+			String json = jsonObject.toString();
+			send(json);
+			System.out.println(json);
+			registerMemberResponse();
+			
+			disconnect();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
 	}
+		
+		
+    public void registerMemberResponse() throws Exception, NoClassDefFoundError, IOException {
+        String json = dis.readUTF();
+        JSONObject root = new JSONObject(json);
+        String statusCode = root.getString("statusCode");
+        String message = root.getString("message");
+        if (statusCode.equals("0")) {
+            System.out.println("회원가입 성공");
+        } else {
+            System.out.println(message);
+            System.out.println("회원가입 실패");
+        }
+    }
+    
 	
 	public void passwdSearch(Scanner scanner) {
 		try {
@@ -146,51 +199,18 @@ public class ChatClient {
 		}
 	}
 	
-	
-	public void fileUpload(Scanner scanner) {
-		
-		try { 
-			Socket sock=new Socket("localhost",50001);
-			System.out.println("파일주소를 입력하세요:");
-			String fileName=scanner.next();
-			File f=new File(fileName);
-			DataOutputStream dos=new DataOutputStream(sock.getOutputStream());
-			dos.writeUTF(f.getName());
-			dos.flush();
-			FileInputStream fis=new FileInputStream(fileName);
-		
-		dos.close();
-		fis.close();
-		System.out.println("파일전송 완료");
-		sock.close();}
-		catch(UnknownHostException ue) {
-			System.out.println(ue.getMessage());
-		}
-		catch(IOException ie) {
-			System.out.println(ie.getMessage());
-		}}
-		
-	public void downloadName(Scanner scanner) {
-		System.out.println("파일명을 입력하세요:");
-		String fileName=scanner.next();
-		String path="c:\\down\\";
-		String file=path+fileName;
-		System.out.println(file+"을 다운로드 합니다");
-	}
-	
 	//메소드: 메인
 	public static void main(String[] args) {		
 		try {			
 			ChatClient chatClient = new ChatClient();
 			boolean stop = false;
-			ChatServer chatServer =new ChatServer();
+			
 			while(false == stop) {
 				System.out.println();
 				System.out.println("1. 로그인");
 				System.out.println("2. 회원가입");
 				System.out.println("3. 비밀번호검색");
-				System.out.println("4. 파일업로드");
-				System.out.println("5. 서버파일목록");
+				System.out.println("4. 회원정보수정");
 				System.out.println("q. 프로그램 종료");
 				System.out.print("메뉴 선택 => ");
 				Scanner scanner = new Scanner(System.in);
@@ -206,11 +226,7 @@ public class ChatClient {
 					chatClient.passwdSearch(scanner);
 					break;
 				case "4":
-					chatClient.fileUpload(scanner);
-					break;
-				case "5":
-					chatServer.files();
-					chatClient.downloadName(scanner);
+					chatClient.updateMember(scanner);
 					break;
 				case "Q", "q":
 					scanner.close();
@@ -255,4 +271,63 @@ public class ChatClient {
 			System.out.println("[클라이언트] 서버 연결 안됨");
 		}
 	}
+
+	private void updateMember(Scanner scanner) {
+		String uid;
+		String pwd;
+		String name;
+		String sex;
+		String address;
+		String phone;
+		
+		try {
+			System.out.println("\n4. 회원정보수정");
+			System.out.print("아이디 : ");
+			uid = scanner.nextLine();
+			System.out.print("비번 : ");
+			pwd = scanner.nextLine();
+			System.out.print("이름 : ");
+			name = scanner.nextLine();
+			System.out.print("성별[남자(M)/여자(F)] : ");
+			sex = scanner.nextLine();
+			System.out.print("주소 : ");
+			address = scanner.nextLine();
+			System.out.print("전화번호 : ");
+			phone = scanner.nextLine();
+
+			connect();
+			
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("command", "updateMember");
+			jsonObject.put("uid", uid);
+			jsonObject.put("pwd", pwd);
+			jsonObject.put("name", name);
+			jsonObject.put("sex", sex);
+			jsonObject.put("address", address);
+			jsonObject.put("phone", phone);
+			String json = jsonObject.toString();
+			send(json);
+			
+			updateMemberResponse();
+			
+			disconnect();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}		
+	}
+	
+	public void updateMemberResponse() throws Exception {
+		String json = dis.readUTF();
+		JSONObject root = new JSONObject(json);
+		String statusCode = root.getString("statusCode");
+		String message = root.getString("message");
+		
+		if (statusCode.equals("0")) {
+			System.out.println("정상적으로 수정되었습니다");
+		} else {
+			System.out.println(message);
+		}
+	}
+	
 }
