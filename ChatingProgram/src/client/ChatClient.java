@@ -1,12 +1,14 @@
 package client;
 
 import java.io.DataInputStream;
+
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Member;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
@@ -14,13 +16,17 @@ import java.util.Scanner;
 import org.json.JSONObject;
 
 import server.ChatServer;
-
 public class ChatClient {
+	private static final String String = null;
 	//필드
+	
 	Socket socket;
 	DataInputStream dis;
 	DataOutputStream dos;
 	String chatName;
+	Scanner sc = new Scanner(System.in);
+	
+	
 	
 	//메소드: 서버 연결
 	public  void connect() throws IOException {
@@ -68,16 +74,16 @@ public class ChatClient {
 			
 			System.out.println("\n1. 로그인 작업");
 			System.out.print("아이디 : ");
-			uid = scanner.nextLine();
+			String uid1 = sc.nextLine();
 			System.out.print("비밀번호 : ");
-			pwd = scanner.nextLine();
+			String pwd1 = sc.nextLine();
 			
 			connect();
 
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("command", "login");
-			jsonObject.put("uid", uid);
-			jsonObject.put("pwd", pwd);
+			jsonObject.put("uid", uid1);
+			jsonObject.put("pwd", pwd1);
 			
 			System.out.println("jsonObject = " + jsonObject.toString());
 			send(jsonObject.toString());
@@ -104,9 +110,38 @@ public class ChatClient {
 		}
 	}
 	
-	public void registerMember(Scanner scanner) {
+	void registerMember(Scanner scanner) {
+		System.out.println("회원가입 입니다.\n");
+		System.out.println("아이디를 입력하세요");
+		String uid = sc.nextLine();
+		System.out.println("비밀번호를 입력하세요");
+		String pwd = sc.nextLine();
+		System.out.println("휴대폰번호를 입력하세요");
+		String number = sc.nextLine();
+		System.out.println("성병을 입력하세요");
+		String sex = sc.nextLine();
+		System.out.println("이름을 입력하세요");
+		String name = sc.nextLine();
+		System.out.println("이메일을 입력하세요");
+		String email = sc.nextLine();
+		
 		
 	}
+	
+
+
+	public void memberInformation(Scanner scanner) {
+		
+		
+		
+		
+		
+		
+		
+	}
+	
+	
+	
 	
 	public void passwdSearch(Scanner scanner) {
 		try {
@@ -189,8 +224,9 @@ public class ChatClient {
 				System.out.println("1. 로그인");
 				System.out.println("2. 회원가입");
 				System.out.println("3. 비밀번호검색");
-				System.out.println("4. 파일업로드");
-				System.out.println("5. 서버파일목록");
+				System.out.println("4. 회원정보수정");
+				System.out.println("5. 파일업로드");
+				System.out.println("6. 서버파일목록");
 				System.out.println("q. 프로그램 종료");
 				System.out.print("메뉴 선택 => ");
 				Scanner scanner = new Scanner(System.in);
@@ -205,10 +241,12 @@ public class ChatClient {
 				case "3":
 					chatClient.passwdSearch(scanner);
 					break;
-				case "4":
+				case"4":
+					chatClient.memberInformation(scanner);
+				case "5":
 					chatClient.fileUpload(scanner);
 					break;
-				case "5":
+				case "6":
 					chatServer.files();
 					chatClient.downloadName(scanner);
 					break;
