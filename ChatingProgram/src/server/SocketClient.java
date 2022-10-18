@@ -92,12 +92,12 @@ public class SocketClient {
         JSONObject jsonResult = new JSONObject();
         
         jsonResult.put("statusCode", "-1");
-        jsonResult.put("message", "로그인 아이디가 존재하지 않습니다");
+        jsonResult.put("message", "[소켓]회원가입 아이디가 존재 합니다.");
         
         try {
             chatServer.memberRepository.insertMember(member);
             jsonResult.put("statusCode", "0");
-            jsonResult.put("message", "회원가입성공");
+            jsonResult.put("message", "[소켓]회원가입 성공");
         } catch (Member.ExistMember e) {
             e.printStackTrace();
         }
