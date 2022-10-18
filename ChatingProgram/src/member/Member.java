@@ -35,19 +35,17 @@ public class Member implements Serializable{
 		this.sex = sex;
 		this.address = address;
 	}
-  	// Member 생성자를 this를 사용하여 초기화 해주었습니다.
-	
+	// Member 생성자를 this를 사용하여 초기화 해주었습니다.
+
 	public Member(JSONObject jsonObject) {
 		uid = jsonObject.getString("uid");
 		pwd = jsonObject.getString("pwd");
 		name = jsonObject.getString("name");
-		phone = jsonObject.getString("phone");
 		sex = jsonObject.getString("sex");
 //		email = jsonObject.getString("email");
-		
+		phone = jsonObject.getString("phone");
 		address = jsonObject.getString("address");
 	}
-	
 	
 	
 	@Override
@@ -86,7 +84,6 @@ public class Member implements Serializable{
 		}
 	}
 
-	
 
 
 	

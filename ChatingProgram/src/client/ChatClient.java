@@ -15,7 +15,7 @@ public class ChatClient {
 	Socket socket;
 	DataInputStream dis;
 	DataOutputStream dos;
-	String chatName;
+	static String chatName;
 
 	// 로그인 여부
 	static boolean logon = false;
@@ -116,10 +116,8 @@ public class ChatClient {
 		String sex;
 		String address;
 		String phone;
-		// String email;
-
 		try {
-			System.out.println("registerMember 성공");
+			
 			System.out.print("아이디 : ");
 			uid = scanner.nextLine();
 
@@ -135,10 +133,9 @@ public class ChatClient {
 			address = scanner.nextLine();
 			System.out.print("전화번호 : ");
 			phone = scanner.nextLine();
-//			System.out.print("이메일 : ");
-//			email = scanner.nextLine();
 
 			connect();
+			
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("command", "registerMember");
 			jsonObject.put("uid", uid);
@@ -147,10 +144,9 @@ public class ChatClient {
 			jsonObject.put("sex", sex);
 			jsonObject.put("address", address);
 			jsonObject.put("phone", phone);
-//			jsonObject.put("email", email);
 			String json = jsonObject.toString();
 			send(json);
-			System.out.println(json);
+			
 			registerMemberResponse();
 
 			disconnect();
@@ -161,7 +157,6 @@ public class ChatClient {
 	}
 
 	public void registerMemberResponse() throws Exception, NoClassDefFoundError, IOException {
-
 		String json = dis.readUTF();
 		JSONObject root = new JSONObject(json);
 		String statusCode = root.getString("statusCode");
@@ -337,18 +332,18 @@ public class ChatClient {
 
 	private void chatJoin() {
 		try {
+			
 			Scanner scanner = new Scanner(System.in);
 			ChatClient chatClient = new ChatClient();
+			
+			//채팅 연결
+			chatClient.connect();
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("command", "incoming");
 			jsonObject.put("data", chatName);
 			String json = jsonObject.toString();
-			System.out.println("send 전");
 			chatClient.send(json);
-			System.out.println("send 후");
-			System.out.println("receive 전");
 			chatClient.receive();
-			System.out.println("receive 후");
 			System.out.println("--------------------------------------------------");
 			System.out.println("보낼 메시지를 입력하고 Enter");
 			System.out.println("채팅를 종료하려면 q를 입력하고 Enter");
@@ -358,14 +353,14 @@ public class ChatClient {
 				if (message.toLowerCase().equals("q")) {
 					break;
 				} else {
-//					jsonObject = new JSONObject();
+					jsonObject = new JSONObject();
 					jsonObject.put("command", "message");
 					jsonObject.put("data", message);
 					chatClient.send(jsonObject.toString());
 				}
 			}
 			scanner.close();
-			// chatClient.unconnect();
+			chatClient.disconnect();
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("[클라이언트] 서버 연결 안됨");
