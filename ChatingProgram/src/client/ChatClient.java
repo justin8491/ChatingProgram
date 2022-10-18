@@ -318,7 +318,7 @@ public class ChatClient {
 					chatClient.updateMember(scanner);
 					break;
 				case "3":
-
+					
 					break;
 				case "4":
 
