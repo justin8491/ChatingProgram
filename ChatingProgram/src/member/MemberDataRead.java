@@ -14,7 +14,7 @@ public class MemberDataRead {
 			@SuppressWarnings("unchecked")
 			List<Member> memberList = (List<Member>) in.readObject();
 			memberList.stream().forEach(m -> System.out.println(m));
-			
+		
 			in.close();
 		} catch (Exception e) {
 			e.printStackTrace();
