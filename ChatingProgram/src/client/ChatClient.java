@@ -104,19 +104,6 @@ public class ChatClient {
 	}
 	
 	void registerMember(Scanner scanner) {
-		System.out.println("회원가입 입니다.\n");
-		System.out.println("아이디를 입력하세요");
-		String uid = sc.nextLine();
-		System.out.println("비밀번호를 입력하세요");
-		String pwd = sc.nextLine();
-		System.out.println("휴대폰번호를 입력하세요");
-		String number = sc.nextLine();
-		System.out.println("성병을 입력하세요");
-		String sex = sc.nextLine();
-		System.out.println("이름을 입력하세요");
-		String name = sc.nextLine();
-		System.out.println("이메일을 입력하세요");
-		String email = sc.nextLine();
 		
 		String uid;
 		String pwd;
