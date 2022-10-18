@@ -16,7 +16,7 @@ public class ChatClient {
 	DataInputStream dis;
 	DataOutputStream dos;
 	String chatName;
-	
+
 	// 로그인 여부
 	static boolean logon = false;
 
@@ -80,6 +80,8 @@ public class ChatClient {
 			jsonObject.put("uid", uid);
 			jsonObject.put("pwd", pwd);
 
+			chatName = uid;
+
 			System.out.println("jsonObject = " + jsonObject.toString());
 			send(jsonObject.toString());
 
@@ -100,6 +102,7 @@ public class ChatClient {
 
 		if (statusCode.equals("0")) {
 			System.out.println("로그인 성공");
+			ChatClient.logon = true;
 		} else {
 			System.out.println(message);
 		}
@@ -119,6 +122,9 @@ public class ChatClient {
 			System.out.println("registerMember 성공");
 			System.out.print("아이디 : ");
 			uid = scanner.nextLine();
+
+			// 호출 닉네임 저장
+
 			System.out.print("비번 : ");
 			pwd = scanner.nextLine();
 			System.out.print("이름 : ");
@@ -155,14 +161,14 @@ public class ChatClient {
 	}
 
 	public void registerMemberResponse() throws Exception, NoClassDefFoundError, IOException {
-		ChatClient chatClient = new ChatClient();
+
 		String json = dis.readUTF();
 		JSONObject root = new JSONObject(json);
 		String statusCode = root.getString("statusCode");
 		String message = root.getString("message");
 		if (statusCode.equals("0")) {
 			System.out.println("회원가입 성공");
-			chatClient.logon = true;
+
 		} else {
 			System.out.println(message);
 			System.out.println("회원가입 실패");
@@ -212,18 +218,24 @@ public class ChatClient {
 		try {
 			ChatClient chatClient = new ChatClient();
 
-			while (false == stop || logon == true) {
+			while (false == stop) {
 				System.out.println();
 				System.out.println("1. 로그인");
 				System.out.println("2. 회원가입");
 				System.out.println("3. 비밀번호검색");
 				System.out.println("q. 프로그램 종료");
 				System.out.print("메뉴 선택 => ");
+
+				// 스캐너
 				Scanner scanner = new Scanner(System.in);
 				String menuNum = scanner.nextLine();
+
 				switch (menuNum) {
 				case "1":
 					chatClient.login(scanner);
+					if (logon == true) {
+						stop = true;
+					}
 					break;
 				case "2":
 					chatClient.registerMember(scanner);
@@ -238,8 +250,9 @@ public class ChatClient {
 					break;
 				}
 			}
-
-			chatClient.loginSucessMenu();
+			// 로그온이 true 일때 만
+			if (logon)
+				chatClient.loginSucessMenu();
 
 //			ChatClient chatClient = new ChatClient();
 //			chatClient.connect();
@@ -278,10 +291,14 @@ public class ChatClient {
 	}
 
 	private void loginSucessMenu() {
+		stop = false;
 		try {
 			ChatClient chatClient = new ChatClient();
-			
-			while (false == stop || logon == true) {
+
+			while (false == stop && logon == true) {
+				System.out.println("--------------------------------------------------");
+				System.out.println("	" + chatName + " 님 환영합니다.");
+				System.out.println("--------------------------------------------------");
 				System.out.println();
 				System.out.println("1. 채팅방 입장");
 				System.out.println("2. 회원정보수정");
@@ -293,16 +310,16 @@ public class ChatClient {
 				String menuNum = scanner.nextLine();
 				switch (menuNum) {
 				case "1":
-					
+					chatClient.chatJoin();
 					break;
 				case "2":
-					
+					chatClient.updateMember(scanner);
 					break;
 				case "3":
-					
+
 					break;
 				case "4":
-					chatClient.updateMember(scanner);
+
 					break;
 				case "Q", "q":
 					scanner.close();
@@ -318,19 +335,42 @@ public class ChatClient {
 		}
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	private void chatJoin() {
+		try {
+			Scanner scanner = new Scanner(System.in);
+			ChatClient chatClient = new ChatClient();
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("command", "incoming");
+			jsonObject.put("data", chatName);
+			String json = jsonObject.toString();
+			chatClient.send(json);
+
+			chatClient.receive();
+
+			System.out.println("--------------------------------------------------");
+			System.out.println("보낼 메시지를 입력하고 Enter");
+			System.out.println("채팅를 종료하려면 q를 입력하고 Enter");
+			System.out.println("--------------------------------------------------");
+			while (true) {
+				String message = scanner.nextLine();
+				if (message.toLowerCase().equals("q")) {
+					break;
+				} else {
+//					jsonObject = new JSONObject();
+					jsonObject.put("command", "message");
+					jsonObject.put("data", message);
+					chatClient.send(jsonObject.toString());
+				}
+			}
+			scanner.close();
+			// chatClient.unconnect();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("[클라이언트] 서버 연결 안됨");
+		}
+
+	}
+
 	private void updateMember(Scanner scanner) {
 		String uid;
 		String pwd;

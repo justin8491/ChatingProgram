@@ -158,28 +158,28 @@ public class SocketClient {
 		close();
 	}
 	
-	private void passwdSearch(JSONObject jsonObject) {
-		String uid = jsonObject.getString("uid");
-		JSONObject jsonResult = new JSONObject();
-		
-		jsonResult.put("statusCode", "-1");
-		jsonResult.put("message", "로그인 아이디가 존재하지 않습니다");
-		
-		try {
-			Member member = chatServer.findByUid(uid);
-			if (null != member) {
-				jsonResult.put("statusCode", "0");
-				jsonResult.put("message", "비밀번호 찾기 성공");
-				jsonResult.put("pwd", member.getPwd());
-			}
-		} catch (Member.NotExistUidPwd e) {
-			e.printStackTrace();
-		}
-				
-		send(jsonResult.toString());
-		
-		close();
-	}
+    private void passwdSearch(JSONObject jsonObject) {
+        String uid = jsonObject.getString("uid");
+        JSONObject jsonResult = new JSONObject();
+        
+        jsonResult.put("statusCode", "-1");
+        jsonResult.put("message", "로그인 아이디가 존재하지 않습니다");
+        
+        try {
+           Member member = chatServer.findByUid(uid);
+           if (null != member) {
+              jsonResult.put("statusCode", "0");
+              jsonResult.put("message", "비밀번호 찾기 성공");
+              jsonResult.put("pwd", member.getPwd());
+           }
+        } catch (Member.NotExistUidPwd e) {
+           e.printStackTrace();
+        }
+              
+        send(jsonResult.toString());
+        
+        close();
+     }
 	
 	//메소드: JSON 보내기
 	public void send(String json) {
