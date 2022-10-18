@@ -4,11 +4,20 @@ import java.io.DataInputStream;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+<<<<<<< HEAD
+import java.io.OutputStream;
+import java.lang.reflect.Member;
+=======
+>>>>>>> YooJongHyeon
 import java.net.Socket;
 import java.util.Scanner;
 
 import org.json.JSONObject;
 
+<<<<<<< HEAD
+import server.ChatServer;
+=======
+>>>>>>> YooJongHyeon
 public class ChatClient {
 	private static final String String = null;
 	//필드
@@ -104,6 +113,19 @@ public class ChatClient {
 	}
 	
 	void registerMember(Scanner scanner) {
+		
+		
+	}
+	
+
+
+	public void memberInformation(Scanner scanner) {
+		
+		
+		
+		
+		
+		
 		
 		String uid;
 		String pwd;
@@ -232,6 +254,11 @@ public class ChatClient {
 				System.out.println("2. 회원가입");
 				System.out.println("3. 비밀번호검색");
 				System.out.println("4. 회원정보수정");
+<<<<<<< HEAD
+				System.out.println("5. 파일업로드");
+				System.out.println("6. 서버파일목록");
+=======
+>>>>>>> YooJongHyeon
 				System.out.println("q. 프로그램 종료");
 				System.out.print("메뉴 선택 => ");
 				Scanner scanner = new Scanner(System.in);
@@ -246,8 +273,19 @@ public class ChatClient {
 				case "3":
 					chatClient.passwdSearch(scanner);
 					break;
+<<<<<<< HEAD
+				case"4":
+					chatClient.memberInformation(scanner);
+				case "5":
+					chatClient.fileUpload(scanner);
+					break;
+				case "6":
+					chatServer.files();
+					chatClient.downloadName(scanner);
+=======
 				case "4":
 					chatClient.updateMember(scanner);
+>>>>>>> YooJongHyeon
 					break;
 				case "Q", "q":
 					scanner.close();

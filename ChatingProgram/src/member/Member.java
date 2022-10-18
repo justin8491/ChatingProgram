@@ -42,10 +42,6 @@ public class Member implements Serializable{
 		pwd = jsonObject.getString("pwd");
 		name = jsonObject.getString("name");
 		phone = jsonObject.getString("phone");
-		sex = jsonObject.getString("sex");
-//		email = jsonObject.getString("email");
-		
-		address = jsonObject.getString("address");
 	}
 	
 	
@@ -86,6 +82,33 @@ public class Member implements Serializable{
 	}
 
 	
+	public String uId() {
+		return uid;
+		// 유저의 아이디를 반환하는 함수
+	}
+	public String Pwd() {
+		return pwd;
+		// 유저의 페스워드를 반환하는 
+	}
+	
+	public String Name() {
+		return name;
+		// 유저의 이름을 반환하는 
+	}
+	public String Phone() {
+		return phone;
+		// 유저의 전화번호를 반환하는 
+	}
+	
+	public String Sex() {
+		return sex;
+		// 유저의 페스워드를 반환하는 
+	}
+	
+	public String Email() {
+		return email;
+		// 유저의 페스워드를 반환하는 
+	}
 
 
 	
