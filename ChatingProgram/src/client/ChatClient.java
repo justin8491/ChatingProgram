@@ -318,7 +318,7 @@ public class ChatClient {
 					chatClient.updateMember(scanner);
 					break;
 				case "3":
-					
+
 					break;
 				case "4":
 
@@ -345,10 +345,12 @@ public class ChatClient {
 			jsonObject.put("command", "incoming");
 			jsonObject.put("data", chatName);
 			String json = jsonObject.toString();
+			System.out.println("send 전");
 			chatClient.send(json);
-
+			System.out.println("send 후");
+			System.out.println("receive 전");
 			chatClient.receive();
-
+			System.out.println("receive 후");
 			System.out.println("--------------------------------------------------");
 			System.out.println("보낼 메시지를 입력하고 Enter");
 			System.out.println("채팅를 종료하려면 q를 입력하고 Enter");
@@ -366,7 +368,7 @@ public class ChatClient {
 			}
 			scanner.close();
 			// chatClient.unconnect();
-		} catch (Exception e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("[클라이언트] 서버 연결 안됨");
 		}
