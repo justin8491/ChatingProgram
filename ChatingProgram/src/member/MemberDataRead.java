@@ -14,7 +14,7 @@ public class MemberDataRead {
 			ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(MEMBER_FILE_NAME)));
 			List<Member> memberList = (List<Member>) in.readObject();
 			memberList.stream().forEach(m -> System.out.println(m));
-			
+		
 			in.close();
 		} catch (Exception e) {
 			e.printStackTrace();
