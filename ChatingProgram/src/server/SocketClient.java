@@ -63,6 +63,11 @@ public class SocketClient {
 							passwdSearch(jsonObject);
 							stop = true;
 							break;
+						case "updateMember":
+						    updateMember(jsonObject);
+						    stop = true;
+						    break;
+						
 						case "registerMember":
 						    registerMember(jsonObject);
 						    stop = true;
@@ -180,7 +185,30 @@ public class SocketClient {
         
         close();
      }
-	
+    
+    private void updateMember(JSONObject jsonObject) {
+        Member member = new Member(jsonObject);
+
+        JSONObject jsonResult = new JSONObject();
+        
+        jsonResult.put("statusCode", "-1");
+        jsonResult.put("message", "로그인 아이디가 존재하지 않습니다");
+        
+        try {
+           chatServer.memberRepository.updateMember(member);
+           jsonResult.put("statusCode", "0");
+           jsonResult.put("message", "회원정보수정이 정상으로 처리되었습니다");
+        } catch (Member.NotExistUidPwd e) {
+           e.printStackTrace();
+        }
+
+        send(jsonResult.toString());
+        
+        close();
+        
+     }
+    
+    
 	//메소드: JSON 보내기
 	public void send(String json) {
 		try {
