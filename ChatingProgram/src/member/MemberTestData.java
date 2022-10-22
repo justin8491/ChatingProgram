@@ -21,7 +21,6 @@ public class MemberTestData {
 						.name("홍길동" + i)
 						.sex(i % 2 == 0 ? "F" : "M")
 						.phone("010-1234-123" + i)
-//						.email("user" + i + "@naver.com")
 						.address("혜화동" + i)
 						.build());
 			}
