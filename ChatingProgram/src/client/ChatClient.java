@@ -289,8 +289,8 @@ public class ChatClient {
 		stop = false;
 		try {
 			ChatClient chatClient = new ChatClient();
-
-			while (false == stop && logon == true) {
+boolean stop = false;
+			while (false == stop) {
 				System.out.println("--------------------------------------------------");
 				System.out.println("	" + chatName + " 님 환영합니다.");
 				System.out.println("--------------------------------------------------");
@@ -360,7 +360,7 @@ public class ChatClient {
 				}
 			}
 			scanner.close();
-			chatClient.disconnect();
+			 chatClient.disconnect();
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("[클라이언트] 서버 연결 안됨");
@@ -373,6 +373,8 @@ public class ChatClient {
 		String pwd;
 		String address;
 		String phone;
+		String sex;
+		String name;
 
 		try {
 			System.out.println("\n4. 회원정보수정");
@@ -382,6 +384,10 @@ public class ChatClient {
 			pwd = scanner.nextLine();
 			System.out.print("주소 : ");
 			address = scanner.nextLine();
+			System.out.print("성별 : ");
+			sex = scanner.nextLine();
+			System.out.print("이름 : ");
+			name = scanner.nextLine();
 			System.out.print("전화번호 : ");
 			phone = scanner.nextLine();
 
@@ -393,7 +399,10 @@ public class ChatClient {
 			jsonObject.put("pwd", pwd);
 			jsonObject.put("address", address);
 			jsonObject.put("phone", phone);
+			jsonObject.put("sex", sex);
+			jsonObject.put("name", name);
 			String json = jsonObject.toString();
+			
 			send(json);
 
 			updateMemberResponse();
