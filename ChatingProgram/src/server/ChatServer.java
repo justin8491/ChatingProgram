@@ -66,16 +66,17 @@ public class ChatServer {
 	//메소드: 모든 클라이언트에게 메시지 보냄 + 귓속말
 	public void sendToAll(SocketClient sender, String message) {
 		JSONObject root = new JSONObject();
-		root.put("clientIp", sender.clientIp);
-		root.put("chatName", sender.chatName);
-		root.put("message", message);
-		String json = root.toString();
+		
 		
 		// 귓속말 조건
 		if(message.indexOf("/") == 0) {
 			int pos = message.indexOf(" ");
 			String key = message.substring(1, pos); // chatName 타겟 키
 			message = "(귓)" + message.substring(pos+1);
+			root.put("clientIp", sender.clientIp);
+			root.put("chatName", sender.chatName);
+			root.put("message", message);
+			String json = root.toString();
 			
 			//타겟 닉네임
 			//소켓 클라이언트 변수에 채팅방 values를 대입
@@ -85,12 +86,21 @@ public class ChatServer {
 					socketClient.send(json);
 				}
 			}
+		}else {
+			root.put("clientIp", sender.clientIp);
+			root.put("chatName", sender.chatName);
+			root.put("message", message);
+			String json = root.toString();
+			
+			chatRoom.values().stream()
+			.filter(socketClient -> socketClient != sender)
+			.forEach(socketClient -> socketClient.send(json));
 		}
 		
 		
-		chatRoom.values().stream()
-		.filter(socketClient -> socketClient != sender)
-		.forEach(socketClient -> socketClient.send(json));
+		
+		
+		
 	}	
 	//메소드: 서버 종료
 	public void stop() {
