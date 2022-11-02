@@ -120,29 +120,6 @@ public class ChatServer {
 		return memberRepository.findByUid(uid);
 	}
 	
-	public void fileUpload() throws IOException {
-		Socket sock=serverSocket.accept();
-		DataInputStream dis=new DataInputStream(sock.getInputStream());
-		String fileName=dis.readUTF();
-		String path="c:\\down";
-		File Folder=new File(path);
-		if(!Folder.exists()) {
-		try {Folder.mkdir();
-		}
-	catch(Exception e) {e.getStackTrace();}}
-	FileOutputStream fos=new FileOutputStream("c:\\down\\"+fileName);
-	byte[] b=new byte[1024];
-	int n=0;
-	while((n=dis.read(b))!=-1) {
-		fos.write(b,0,n);
-	}
-	
-	fos.close();
-	dis.close();
-	sock.close();
-	System.out.println("파일수신 완료");
-
-}
 
 	
 	

@@ -59,8 +59,8 @@ public class ChatClient {
 	}
 
 	// 메소드: JSON 보내기
-	public void send(String json) throws IOException {
-		dos.writeUTF(json);
+	public void send(JSONObject json) throws IOException {
+		dos.writeUTF(json.toString());
 		dos.flush();
 	}
 
@@ -90,7 +90,7 @@ public class ChatClient {
 			chatName = uid;
 
 			System.out.println("jsonObject = " + jsonObject.toString());
-			send(jsonObject.toString());
+			send(jsonObject);
 
 			loginResponse();
 
@@ -123,6 +123,7 @@ public class ChatClient {
 		String sex;
 		String address;
 		String phone;
+		
 		try {
 			System.out.print("아이디 : ");
 			uid = scanner.nextLine();
@@ -150,8 +151,7 @@ public class ChatClient {
 			jsonObject.put("sex", sex);
 			jsonObject.put("address", address);
 			jsonObject.put("phone", phone);
-			String json = jsonObject.toString();
-			send(json);
+			send(jsonObject);
 			
 			registerMemberResponse();
 
@@ -189,8 +189,7 @@ public class ChatClient {
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("command", "passwdSearch");
 			jsonObject.put("uid", uid);
-			String json = jsonObject.toString();
-			send(json);
+			send(jsonObject);
 
 			passwdSearchResponse();
 
@@ -263,35 +262,27 @@ public class ChatClient {
 		}
 	}
 
+	Scanner scanner = new Scanner(System.in);
+	ChatClient chatClient = new ChatClient();
+	
 	private void chatJoin() {
 		try {
-
-			Scanner scanner = new Scanner(System.in);
-			ChatClient chatClient = new ChatClient();
-
 			// 채팅 연결
 			chatClient.connect();
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("command", "incoming");
 			jsonObject.put("data", chatName);
-			String json = jsonObject.toString();
-			chatClient.send(json);
+			
+			chatClient.send(jsonObject);
+			
 			chatClient.receive();
 			System.out.println("--------------------------------------------------");
 			System.out.println("보낼 메시지를 입력하고 Enter");
 			System.out.println("채팅를 종료하려면 q를 입력하고 Enter");
 			System.out.println("--------------------------------------------------");
-			while (true) {
-				String message = scanner.nextLine();
-				if (message.toLowerCase().equals("q")) {
-					break;
-				} else {
-					jsonObject = new JSONObject();
-					jsonObject.put("command", "message");
-					jsonObject.put("data", message);
-					chatClient.send(jsonObject.toString());
-				}
-			}
+			
+			runChat();
+			
 			scanner.close();
 			chatClient.disconnect();
 		} catch (IOException e) {
@@ -301,6 +292,22 @@ public class ChatClient {
 
 	}
 
+	private void runChat() throws IOException {
+		JSONObject jsonObject = new JSONObject();
+
+		while (true) {
+			String message = scanner.nextLine();
+			if (message.toLowerCase().equals("q")) {
+				break;
+			} else {
+				jsonObject = new JSONObject();
+				jsonObject.put("command", "message");
+				jsonObject.put("data", message);
+				chatClient.send(jsonObject);
+			}
+		}
+	}
+	
 	private void updateMember(Scanner scanner) {
 		String uid;
 		String pwd;
@@ -334,8 +341,7 @@ public class ChatClient {
 			jsonObject.put("sex", sex);
 			jsonObject.put("address", address);
 			jsonObject.put("phone", phone);
-			String json = jsonObject.toString();
-			send(json);
+			send(jsonObject);
 
 			updateMemberResponse();
 
@@ -367,9 +373,8 @@ public class ChatClient {
 			// 사전에 서버에서 파일 목록을 받을 참조 변수를 null로 초기화 한다
 			fileList = null;
 
-			String json = jsonObject.toString();
 			connect();
-			send(json);
+			send(jsonObject);
 
 			System.out.println("서버에 파일 목록 요청");
 
@@ -422,9 +427,8 @@ public class ChatClient {
 			jsonObject.put("fileName", file.getName());
 			jsonObject.put("content", new String(Base64.getEncoder().encode(data)));
 
-			String json = jsonObject.toString();
 			connect();
-			send(json);
+			send(jsonObject);
 
 			System.out.println("파일전송 완료");
 		} catch (UnknownHostException ue) {
@@ -457,9 +461,8 @@ public class ChatClient {
 			jsonObject.put("command", "fileDownload");
 			jsonObject.put("fileName", fileName);
 
-			String json = jsonObject.toString();
 			connect();
-			send(json);
+			send(jsonObject);
 
 			fileDownloadResponse(fileName);
 
