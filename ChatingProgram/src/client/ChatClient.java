@@ -18,15 +18,21 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import member.Member;
+import member.Member.ExistMember;
+import member.Member.NotExistUidPwd;
 import member.MemberRepositoryDB;
+import member.MemberRepositoryForDB;
 
-public class ChatClient {
+public class ChatClient implements MemberRepositoryForDB{
 	// 필드
 	Socket socket;
 	DataInputStream dis;
 	DataOutputStream dos;
 	static String chatName;
 	static ChatClient chatClient = new ChatClient();
+	
+	// 타켓 PRIMARY_KEY
+	String PRIMARY_KEY = "";
 
 	// 로그인 여부
 	static boolean logon = false;
@@ -73,8 +79,13 @@ public class ChatClient {
 		socket.close();
 	}
 
+	
 	public void login(Scanner scanner) {
 		try {
+			
+			
+			JSONObject jsonObject = new JSONObject();
+			
 			String uid;
 			String pwd;
 
@@ -86,7 +97,7 @@ public class ChatClient {
 
 			connect();
 
-			JSONObject jsonObject = new JSONObject();
+
 			jsonObject.put("command", "login");
 			jsonObject.put("uid", uid);
 			jsonObject.put("pwd", pwd);
@@ -553,6 +564,24 @@ public class ChatClient {
 			e.printStackTrace();
 			System.out.println("[클라이언트] 서버 연결 안됨");
 		}
+	}
+
+	@Override
+	public void insertMember(Member member) throws ExistMember {
+		
+		
+	}
+
+	@Override
+	public Member findByUid(String uid) throws NotExistUidPwd {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void updateMember(Member member) throws NotExistUidPwd {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

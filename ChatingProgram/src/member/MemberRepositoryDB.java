@@ -125,28 +125,62 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 	}
 	
 //
-	public synchronized void updateMember(Member member) throws Member.NotExistUidPwd {
+	public synchronized void updateMember(Scanner scanner) throws Member.NotExistUidPwd {
 		try {
 			open();
+			
+			pstmt = conn.prepareStatement(Env.getProperty("EXIST_MEMBER"));
 
+			//멤버 존재여부 확인
+			pstmt.setString(1, scanner.getUid());
+			ResultSet rs = pstmt.executeQuery();
+			int count = 0; 
+			if (rs.next()) {
+				count = rs.getInt(1);
+			}
+			rs.close();
+			if (count != 0) {
+				throw new Member.ExistMember("[" + member.getUid() + "] 아이디가 존재합니다" );
+			}
+			pstmt.close();
 			pstmt = conn.prepareStatement(Env.getProperty("UPDATE_MEMBER"));
 
 			//멤버 정보 설정 
+			
 			pstmt.setString(1, member.getPwd());
 			pstmt.setString(2, member.getName());
 			pstmt.setString(3, member.getSex());
 			pstmt.setString(4, member.getAddress());
 			pstmt.setString(5, member.getPhone());
 			pstmt.setString(6, member.getUid());
-			if (-1 == pstmt.executeUpdate()) {
-				throw new Member.NotExistUidPwd("[" + member.getUid()+ "] 아이디가 존재하지 않습니다");			
-			}
+			pstmt.executeUpdate();
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			close();
-		}		
+		}
+//		try {
+//			open();
+//
+//			pstmt = conn.prepareStatement(Env.getProperty("UPDATE_MEMBER"));
+//
+//			//멤버 정보 설정 
+//			pstmt.setString(1, member.getPwd());
+//			pstmt.setString(2, member.getName());
+//			pstmt.setString(3, member.getSex());
+//			pstmt.setString(4, member.getAddress());
+//			pstmt.setString(5, member.getPhone());
+//			pstmt.setString(6, member.getUid());
+//			if (-1 == pstmt.executeUpdate()) {
+//				throw new Member.NotExistUidPwd("[" + member.getUid()+ "] 아이디가 존재하지 않습니다");			
+//			}
+//			
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} finally {
+//			close();
+//		}		
 	}
 //
 	public void insertTest() {
@@ -191,7 +225,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 	private static void findByUidTest() {
 		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
 		try {
-			Member member = memberRepository.findByUid("abcd123");
+			Member member = memberRepository.findByUid(memberRepository);
 			if (member != null) {
 				System.out.println(member.toString());
 			}
@@ -219,8 +253,8 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 	}
 	public static void main(String []args) {
 		
-		updateTest();
-		findByUidTest();
+		//updateTest();
+		//findByUidTest();
 	}
 
 }
