@@ -18,6 +18,7 @@ public class MemberRepository {
 	Map<String, Member> memberMap = null;
 	private static final String MEMBER_FILE_NAME = "c:\\temp\\member.db";
 
+	@SuppressWarnings("unchecked")
 	public void loadMember() {
 		try {
 			File file = new File(MEMBER_FILE_NAME);

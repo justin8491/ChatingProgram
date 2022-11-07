@@ -23,6 +23,7 @@ public class ChatClient {
 	DataInputStream dis;
 	DataOutputStream dos;
 	static String chatName;
+	static ChatClient chatClient = new ChatClient();
 
 	// 로그인 여부
 	static boolean logon = false;
@@ -216,7 +217,6 @@ public class ChatClient {
 	private void loginSucessMenu() {
 		stop = false;
 		try {
-			ChatClient chatClient = new ChatClient();
 
 			while (false == stop && logon == true) {
 				System.out.println("--------------------------------------------------");
@@ -261,9 +261,9 @@ public class ChatClient {
 			System.out.println("[클라이언트] 서버 연결 안됨");
 		}
 	}
-
+	
 	Scanner scanner = new Scanner(System.in);
-	ChatClient chatClient = new ChatClient();
+	
 	
 	private void chatJoin() {
 		try {
@@ -272,16 +272,17 @@ public class ChatClient {
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("command", "incoming");
 			jsonObject.put("data", chatName);
-			
+
 			chatClient.send(jsonObject);
 			
 			chatClient.receive();
+			
 			System.out.println("--------------------------------------------------");
 			System.out.println("보낼 메시지를 입력하고 Enter");
 			System.out.println("채팅를 종료하려면 q를 입력하고 Enter");
 			System.out.println("--------------------------------------------------");
-			
 			runChat();
+			
 			
 			scanner.close();
 			chatClient.disconnect();

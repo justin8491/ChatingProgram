@@ -9,9 +9,13 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,6 +32,27 @@ public class ChatServer {
 	ExecutorService threadPool = Executors.newFixedThreadPool(100);
 	Map<String, SocketClient> chatRoom = Collections.synchronizedMap(new HashMap<>());
 	MemberRepository memberRepository = new MemberRepository();
+	
+	//DB 연결
+	public void oracleDB_Connect() throws IOException, SQLException, ClassNotFoundException {
+		try {
+			Properties prop = new Properties();
+			prop.load(new FileInputStream("db.properties"));
+			
+			Class.forName(prop.getProperty("driverClass"));
+			System.out.println("JDBC 드라이버 로딩 성공");
+			
+			Connection conn1 = DriverManager.getConnection(prop.getProperty("dbServerConn")
+					, prop.getProperty("dbUser")
+					, prop.getProperty("dbPasswd"));
+			
+			conn1.setAutoCommit(false);
+			System.out.println("DB 서버에 연결됨");
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+	
 	
 	//메소드: 서버 시작
 	public void start() throws IOException {
