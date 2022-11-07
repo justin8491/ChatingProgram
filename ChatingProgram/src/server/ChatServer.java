@@ -9,9 +9,13 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,6 +33,28 @@ public class ChatServer {
 	Map<String, SocketClient> chatRoom = Collections.synchronizedMap(new HashMap<>());
 	MemberRepository memberRepository = new MemberRepository();
 	
+	//DB 연결
+	public void oracleDBConnect() {
+		try {
+			Properties prop = new Properties();
+			prop.load(new FileInputStream("db.properties"));
+			
+			Class.forName(prop.getProperty("driverClass"));
+			System.out.println("JDBC 드라이버 로딩 성공");
+			
+			Connection conn = DriverManager.getConnection(prop.getProperty("dbServerConn")
+					, prop.getProperty("dbUser")
+					, prop.getProperty("dbPasswd"));
+			
+			System.out.println("DB 서버에 연결됨");
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println("DB 연결 실패");
+			System.out.println(e.getMessage());
+		}
+			
+	}
+	
 	//메소드: 서버 시작
 	public void start() throws IOException {
 		
@@ -44,6 +70,7 @@ public class ChatServer {
 					SocketClient sc = new SocketClient(this, socket);
 				}
 			} catch(IOException e) {
+				
 			}
 		});
 		thread.start();
@@ -145,6 +172,7 @@ public class ChatServer {
 	public static void main(String[] args) {	
 		try {
 			ChatServer chatServer = new ChatServer();
+			chatServer.oracleDBConnect();
 			chatServer.start();
 			
 			System.out.println("----------------------------------------------------");
