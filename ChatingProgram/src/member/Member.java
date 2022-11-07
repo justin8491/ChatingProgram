@@ -26,7 +26,8 @@ public class Member implements Serializable{
   	// 접근제어자 private 을 주어 해당 클레스에서만 접근할 수 있도록 했습니다.
 	
 	public Member(String uid, String pwd, String name, String phone, String sex, String address) 
-	{
+	{	
+		super();
 		this.uid = uid;
 		this.pwd = pwd;
 		this.name = name;
@@ -47,7 +48,7 @@ public class Member implements Serializable{
 		address = jsonObject.getString("address");
 	}
 	
-	
+	public Member(){}
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
