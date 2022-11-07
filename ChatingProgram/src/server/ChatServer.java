@@ -34,7 +34,7 @@ public class ChatServer {
 	MemberRepository memberRepository = new MemberRepository();
 	
 	//DB 연결
-	public void oracleDB_Connect() throws IOException, SQLException, ClassNotFoundException {
+	public void oracleDBConnect() {
 		try {
 			Properties prop = new Properties();
 			prop.load(new FileInputStream("db.properties"));
@@ -42,17 +42,18 @@ public class ChatServer {
 			Class.forName(prop.getProperty("driverClass"));
 			System.out.println("JDBC 드라이버 로딩 성공");
 			
-			Connection conn1 = DriverManager.getConnection(prop.getProperty("dbServerConn")
+			Connection conn = DriverManager.getConnection(prop.getProperty("dbServerConn")
 					, prop.getProperty("dbUser")
 					, prop.getProperty("dbPasswd"));
 			
-			conn1.setAutoCommit(false);
 			System.out.println("DB 서버에 연결됨");
 		} catch (Exception e) {
 			// TODO: handle exception
+			System.out.println("DB 연결 실패");
+			System.out.println(e.getMessage());
 		}
+			
 	}
-	
 	
 	//메소드: 서버 시작
 	public void start() throws IOException {
@@ -69,6 +70,7 @@ public class ChatServer {
 					SocketClient sc = new SocketClient(this, socket);
 				}
 			} catch(IOException e) {
+				
 			}
 		});
 		thread.start();
@@ -170,6 +172,7 @@ public class ChatServer {
 	public static void main(String[] args) {	
 		try {
 			ChatServer chatServer = new ChatServer();
+			chatServer.oracleDBConnect();
 			chatServer.start();
 			
 			System.out.println("----------------------------------------------------");
