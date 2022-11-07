@@ -141,6 +141,7 @@ public class MemberRepositoryDB {
 				member.setSex(rs.getString("SEX"));
 				member.setAddress(rs.getString("ADDRESS"));
 				member.setPhone(rs.getString("PHONE"));
+				member.setExist(rs.getString("EXIST")); 
 				rs.close();
 				return member;
 			} else {
@@ -183,6 +184,7 @@ public class MemberRepositoryDB {
 			pstmt.setString(4, member.getAddress());
 			pstmt.setString(5, member.getPhone());
 			pstmt.setString(6, member.getUid());
+			
 			pstmt.executeUpdate();
 
 		} catch (Exception e) {
@@ -190,30 +192,10 @@ public class MemberRepositoryDB {
 		} finally {
 			close();
 		}
-//		try {
-//			open();
-//
-//			pstmt = conn.prepareStatement(Env.getProperty("UPDATE_MEMBER"));
-//
-//			//멤버 정보 설정 
-//			pstmt.setString(1, member.getPwd());
-//			pstmt.setString(2, member.getName());
-//			pstmt.setString(3, member.getSex());
-//			pstmt.setString(4, member.getAddress());
-//			pstmt.setString(5, member.getPhone());
-//			pstmt.setString(6, member.getUid());
-//			if (-1 == pstmt.executeUpdate()) {
-//				throw new Member.NotExistUidPwd("[" + member.getUid()+ "] 아이디가 존재하지 않습니다");			
-//			}
-//			
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		} finally {
-//			close();
-//		}		
+
 	}
 
-//
+
 	public void insertTest() {
 		String uid;
 		String pwd;
@@ -252,18 +234,7 @@ public class MemberRepositoryDB {
 
 	}
 
-	private static void findByUidTest() {
-//		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
-//		try {
-//			Member member = memberRepository.findByUid(memberRepository);
-//			if (member != null) {
-//				System.out.println(member.toString());
-//			}
-//		} catch (NotExistUidPwd e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-	}
+
 
 	private static void updateTest() {
 		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
@@ -282,6 +253,66 @@ public class MemberRepositoryDB {
 		}
 	}
 
+	public void deleteTest() { 
+		MemberRepositoryDB memberRepository = new MemberRepositoryDB(); 
+		 
+		Scanner sc=new Scanner(System.in); 
+		System.out.print("아이디 : "); 
+		String uid = sc.nextLine(); 
+		System.out.print("비번 : "); 
+		String pwd = sc.nextLine(); 
+	 
+		try { 
+			Member member = memberRepository.findByUid(uid); 
+			if(pwd.equals(member.getPwd())){ 
+			memberRepository.deleteMember(member); 
+			System.out.println("탈퇴 완료"); 
+			} 
+			else { 
+				System.out.println("아이디나 비밀번호가 존재하지 않습니다"); 
+			} 
+		} 
+		catch (NotExistUidPwd e) { 
+			// TODO Auto-generated catch block 
+			e.printStackTrace(); 
+		}			 
+	} 
+	public synchronized void deleteMember(Member member) throws Member.NotExistUidPwd{ 
+		 
+		try { 
+			open(); 
+			 
+			pstmt = conn.prepareStatement(Env.getProperty("SELECT_MEMBER")); 
+ 
+			//멤버 존재여부 확인 
+			pstmt.setString(1, member.getUid()); 
+			ResultSet rs = pstmt.executeQuery(); 
+			int count = 0;  
+			if (rs.next()) { 
+				count = rs.getInt(1); 
+			} 
+			rs.close(); 
+			if (count == 0) { 
+				throw new Member.ExistMember("[" + member.getUid() + "] 아이디가 없습니다" ); 
+			} 
+			pstmt.close(); 
+			pstmt = conn.prepareStatement(Env.getProperty("DELETE_MEMBER")); 
+ 
+			//멤버 정보 설정  
+			pstmt.setString(1, member.getUid()); 
+			pstmt.setString(2, member.getPwd());
+			System.out.println("-------------" + pstmt.toString());
+			pstmt.executeUpdate(); 
+			
+			
+		} catch (Exception e) { 
+			e.printStackTrace();
+
+		} finally { 
+			close(); 
+		} 
+	} 
+	
 	public static void main(String[] args) {
 
 		// updateTest();

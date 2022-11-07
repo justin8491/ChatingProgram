@@ -417,6 +417,7 @@ public class ChatClient implements MemberRepositoryForDB{
 				System.out.println("1. 로그인");
 				System.out.println("2. 회원가입");
 				System.out.println("3. 비밀번호검색");
+				System.out.println("4. 회원탈퇴");
 				System.out.println("q. 프로그램 종료");
 				System.out.print("메뉴 선택 => ");
 
@@ -436,6 +437,9 @@ public class ChatClient implements MemberRepositoryForDB{
 					break;
 				case "3":
 					chatClient.passwdSearch(scanner);
+					break;
+				case "4":
+					memberRepository.deleteTest();
 					break;
 				case "Q", "q":
 					scanner.close();
