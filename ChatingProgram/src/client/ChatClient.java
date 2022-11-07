@@ -16,6 +16,7 @@ import java.util.Scanner;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import member.Member;
 
@@ -177,6 +178,9 @@ public class ChatClient {
 			System.out.println("회원가입 실패");
 		}
 	}
+	
+	
+	
 
 	public void passwdSearch(Scanner scanner) {
 		try {
@@ -264,6 +268,33 @@ boolean stop = false;
 			System.out.println("[클라이언트] 서버 연결 안됨");
 		}
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	private void chatJoin() {
 		try {
