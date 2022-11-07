@@ -17,6 +17,9 @@ import java.util.Scanner;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import member.Member;
+import member.MemberRepositoryDB;
+
 public class ChatClient {
 	// 필드
 	Socket socket;
@@ -510,7 +513,7 @@ public class ChatClient {
 	public static void main(String[] args) {
 		try {
 			ChatClient chatClient = new ChatClient();
-
+			MemberRepositoryDB memberRepository=new MemberRepositoryDB();
 			while (false == stop) {
 				System.out.println();
 				System.out.println("1. 로그인");
@@ -531,7 +534,7 @@ public class ChatClient {
 					}
 					break;
 				case "2":
-					chatClient.registerMember(scanner);
+					memberRepository.insertTest();
 					break;
 				case "3":
 					chatClient.passwdSearch(scanner);
