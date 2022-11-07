@@ -28,14 +28,14 @@ public class ChatClient implements MemberRepositoryForDB{
 	Socket socket;
 	DataInputStream dis;
 	DataOutputStream dos;
-	static String chatName;
+	public static String chatName;
 	static ChatClient chatClient = new ChatClient();
 	
-	// 타켓 PRIMARY_KEY
-	String PRIMARY_KEY = "";
+//	// 타켓 PRIMARY_KEY
+//	String PRIMARY_KEY = "";
 
 	// 로그인 여부
-	static boolean logon = false;
+	public static boolean logon = false;
 
 	// UI 반복문 여부
 	static boolean stop = false;
@@ -78,119 +78,6 @@ public class ChatClient implements MemberRepositoryForDB{
 	public void disconnect() throws IOException {
 		socket.close();
 	}
-
-	
-	public void login(Scanner scanner) {
-		try {
-			
-			
-			JSONObject jsonObject = new JSONObject();
-			
-			String uid;
-			String pwd;
-
-			System.out.println("\n1. 로그인 작업");
-			System.out.print("아이디 : ");
-			uid = scanner.nextLine();
-			System.out.print("비밀번호 : ");
-			pwd = scanner.nextLine();
-
-			connect();
-
-
-			jsonObject.put("command", "login");
-			jsonObject.put("uid", uid);
-			jsonObject.put("pwd", pwd);
-
-			chatName = uid;
-
-			System.out.println("jsonObject = " + jsonObject.toString());
-			send(jsonObject);
-
-			loginResponse();
-
-			disconnect();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void loginResponse() throws Exception {
-		String json = dis.readUTF();
-		JSONObject root = new JSONObject(json);
-		String statusCode = root.getString("statusCode");
-		String message = root.getString("message");
-
-		if (statusCode.equals("0")) {
-			System.out.println("로그인 성공");
-			ChatClient.logon = true;
-		} else {
-			System.out.println(message);
-		}
-	}
-
-	public void registerMember(Scanner scanner) {
-
-		String uid;
-		String pwd;
-		String name;
-		String sex;
-		String address;
-		String phone;
-		
-		try {
-			System.out.print("아이디 : ");
-			uid = scanner.nextLine();
-
-			// 호출 닉네임 저장
-
-			System.out.print("비번 : ");
-			pwd = scanner.nextLine();
-			System.out.print("이름 : ");
-			name = scanner.nextLine();
-			System.out.print("성별[남자(M)/여자(F)] : ");
-			sex = scanner.nextLine();
-			System.out.print("주소 : ");
-			address = scanner.nextLine();
-			System.out.print("전화번호 : ");
-			phone = scanner.nextLine();
-
-			connect();
-			
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("command", "registerMember");
-			jsonObject.put("uid", uid);
-			jsonObject.put("pwd", pwd);
-			jsonObject.put("name", name);
-			jsonObject.put("sex", sex);
-			jsonObject.put("address", address);
-			jsonObject.put("phone", phone);
-			send(jsonObject);
-			
-			registerMemberResponse();
-
-			disconnect();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void registerMemberResponse() throws Exception, NoClassDefFoundError, IOException {
-		String json = dis.readUTF();
-		JSONObject root = new JSONObject(json);
-		String statusCode = root.getString("statusCode");
-		String message = root.getString("message");
-		if (statusCode.equals("0")) {
-			System.out.println("회원가입 성공");
-
-		} else {
-			System.out.println(message);
-			System.out.println("회원가입 실패");
-		}
-	}
-
 	public void passwdSearch(Scanner scanner) {
 		try {
 			String uid;
@@ -207,7 +94,7 @@ public class ChatClient implements MemberRepositoryForDB{
 			send(jsonObject);
 
 			passwdSearchResponse();
-
+			
 			disconnect();
 
 		} catch (Exception e) {
@@ -228,7 +115,7 @@ public class ChatClient implements MemberRepositoryForDB{
 		}
 	}
 
-	private void loginSucessMenu() {
+	public void loginSucessMenu() {
 		stop = false;
 		try {
 
@@ -539,7 +426,7 @@ public class ChatClient implements MemberRepositoryForDB{
 
 				switch (menuNum) {
 				case "1":
-					chatClient.login(scanner);
+					memberRepository.login();
 					if (logon == true) {
 						stop = true;
 					}
@@ -566,11 +453,7 @@ public class ChatClient implements MemberRepositoryForDB{
 		}
 	}
 
-	@Override
-	public void insertMember(Member member) throws ExistMember {
-		
-		
-	}
+
 
 	@Override
 	public Member findByUid(String uid) throws NotExistUidPwd {
@@ -580,6 +463,18 @@ public class ChatClient implements MemberRepositoryForDB{
 
 	@Override
 	public void updateMember(Member member) throws NotExistUidPwd {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void login(String uid) throws NotExistUidPwd {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void registerMember(Member member) throws ExistMember {
 		// TODO Auto-generated method stub
 		
 	}

@@ -15,7 +15,8 @@ import java.util.stream.Collectors;
 import member.Member;
 
 public interface MemberRepositoryForDB {
-	void insertMember(Member member) throws Member.ExistMember;
+	void login(String uid) throws Member.NotExistUidPwd;
+	void registerMember(Member member) throws Member.ExistMember;
 	Member findByUid(String uid) throws Member.NotExistUidPwd;
 	void updateMember(Member member) throws Member.NotExistUidPwd;
 }

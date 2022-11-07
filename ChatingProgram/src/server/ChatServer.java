@@ -35,37 +35,13 @@ public class ChatServer implements MemberRepositoryForDB{
 	ServerSocket serverSocket;
 	ExecutorService threadPool = Executors.newFixedThreadPool(100);
 	Map<String, SocketClient> chatRoom = Collections.synchronizedMap(new HashMap<>());
-	MemberRepositoryDB memberRepository = new MemberRepository();
-	
-
-//	
-//	//DB 연결
-//	public void oracleDBConnect() {
-//		try {
-//			Properties prop = new Properties();
-//			prop.load(new FileInputStream("db.properties"));
-//			
-//			Class.forName(prop.getProperty("driverClass"));
-//			System.out.println("JDBC 드라이버 로딩 성공");
-//			
-//			Connection conn = DriverManager.getConnection(prop.getProperty("dbServerConn")
-//					, prop.getProperty("dbUser")
-//					, prop.getProperty("dbPasswd"));
-//			
-//			System.out.println("DB 서버에 연결됨");
-//		} catch (Exception e) {
-//			// TODO: handle exception
-//			System.out.println("DB 연결 실패");
-//			System.out.println(e.getMessage());
-//		}
-//			
-//	}
+	MemberRepositoryDB memberRepository = new MemberRepositoryDB();
 	
 	//메소드: 서버 시작
 	public void start() throws IOException {
 		
 		//멤버 로드
-		memberRepository.loadMember();
+		//memberRepository.loadMember();
 		
 		serverSocket = new ServerSocket(50001);	
 		System.out.println( "[서버] 시작됨test");
@@ -146,25 +122,33 @@ public class ChatServer implements MemberRepositoryForDB{
 		} catch (IOException e1) {}
 	}
 	
-	public synchronized void registerMember(Member member) throws Member.ExistMember {
-		memberRepository.insertMember(member);
-	}
-	
-	public synchronized Member findByUid(String uid) throws Member.NotExistUidPwd {
-		return memberRepository.findByUid(uid);
-	}
 	
 	@Override
-	public void insertMember(Member member) throws ExistMember {
-		memberRepository.insertMember(member);
-		
-	}
-	@Override
-	public void updateMember(Member member) throws NotExistUidPwd {
+	public void login(String uid) throws NotExistUidPwd {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
+	//메소드 : INSERT
+	@Override
+	public void registerMember(Member member) throws ExistMember {
+		memberRepository.insertMember(member);
+		
+	}
+	
+	//메소드 : SELECT
+	@Override
+	public Member findByUid(String uid) throws NotExistUidPwd {
+		return memberRepository.findByUid(uid);
+	}
+	
+	//메소드 : UPDATE
+	@Override
+	public void updateMember(Member member) throws NotExistUidPwd {
+		memberRepository.updateMember(member);
+		
+	}
+	
 	
 	
 	
@@ -208,5 +192,9 @@ public class ChatServer implements MemberRepositoryForDB{
 			System.out.println("[서버] " + e.getMessage());
 		}
 	}
+	
+
+	
+	
 	
 }

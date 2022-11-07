@@ -19,30 +19,60 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import client.ChatClient;
 import member.Member;
 import member.Member.ExistMember;
 import member.Member.NotExistUidPwd;
 
-public class MemberRepositoryDB implements MemberRepositoryForDB{
+public class MemberRepositoryDB {
 //	List<Member> memberList = null;
 //	Map<String, Member> memberMap = null;
 	Connection conn = null;
 	PreparedStatement pstmt = null;
+	ChatClient chatClient = new ChatClient();
+	Scanner scanner = new Scanner(System.in);
 
 	public void open() {
 		try {
 			Class.forName(Env.getProperty("driverClass"));
 			System.out.println("JDBC 드라이버 로딩 성공");
-			
-			conn = DriverManager.getConnection(Env.getProperty("dbServerConn")
-					, Env.getProperty("dbUser")
-					, Env.getProperty("dbPasswd"));
+
+			conn = DriverManager.getConnection(Env.getProperty("dbServerConn"), Env.getProperty("dbUser"),
+					Env.getProperty("dbPasswd"));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
+	public synchronized void login() {
+		try {
+			MemberRepositoryDB memberrepository = new MemberRepositoryDB();
+			Member member = new Member();
+			open();
+			System.out.println("\n1. 로그인 작업");
+			System.out.print("아이디 : ");
+			String uid = scanner.nextLine();
+			System.out.print("비밀번호 : ");
+			String pwd = scanner.next();
+			member = memberrepository.findByUid(uid);
+			if(!pwd.equals(member.getPwd())) {
+				System.out.println("로그인 실패");
+			}else {
+				System.out.println("로그인 성공");
+				chatClient.chatName = member.getName();
+				chatClient.connect();
+				chatClient.logon = true;
+			}
+			
+			
+
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+
+	}
+
 	private void close() {
 		try {
 			if (pstmt != null) {
@@ -54,31 +84,31 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	public synchronized void insertMember(Member member) throws Member.ExistMember {
-		
+
 		try {
 			open();
-			
-			pstmt = conn.prepareStatement(Env.getProperty("EXIST_MEMBER"));
 
-			//멤버 존재여부 확인
+			pstmt = conn.prepareStatement(Env.getProperty("SELECT_MEMBER"));
+
+			// 멤버 존재여부 확인
 			pstmt.setString(1, member.getUid());
 			ResultSet rs = pstmt.executeQuery();
-			int count = 0; 
+			int count = 0;
 			if (rs.next()) {
 				count = rs.getInt(1);
 			}
 			rs.close();
 			if (count != 0) {
-				throw new Member.ExistMember("[" + member.getUid() + "] 아이디가 존재합니다" );
+				throw new Member.ExistMember("[" + member.getUid() + "] 아이디가 존재합니다");
 			}
 			pstmt.close();
 			pstmt = conn.prepareStatement(Env.getProperty("INSERT_MEMBER"));
 
-			//멤버 정보 설정 
+			// 멤버 정보 설정
 			pstmt.setString(1, member.getUid());
 			pstmt.setString(2, member.getPwd());
 			pstmt.setString(3, member.getName());
@@ -86,21 +116,21 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 			pstmt.setString(5, member.getAddress());
 			pstmt.setString(6, member.getPhone());
 			pstmt.executeUpdate();
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			close();
 		}
 	}
-	
+
 	public Member findByUid(String uid) throws Member.NotExistUidPwd {
 		try {
 			open();
 
 			pstmt = conn.prepareStatement(Env.getProperty("findByUidMember"));
 
-			//멤버 존재여부 확인
+			// 멤버 존재여부 확인
 			pstmt.setString(1, uid);
 			ResultSet rs = pstmt.executeQuery();
 			if (rs.next()) {
@@ -112,9 +142,9 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 				member.setAddress(rs.getString("ADDRESS"));
 				member.setPhone(rs.getString("PHONE"));
 				rs.close();
-				return member; 
+				return member;
 			} else {
-				throw new Member.NotExistUidPwd("[" + uid + "] 아이디가 존재하지 않습니다");			
+				throw new Member.NotExistUidPwd("[" + uid + "] 아이디가 존재하지 않습니다");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -123,30 +153,30 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 		}
 		return null;
 	}
-	
+
 //
-	public synchronized void updateMember(Scanner scanner) throws Member.NotExistUidPwd {
+	public synchronized void updateMember(Member member) throws Member.NotExistUidPwd {
 		try {
 			open();
-			
-			pstmt = conn.prepareStatement(Env.getProperty("EXIST_MEMBER"));
 
-			//멤버 존재여부 확인
-			pstmt.setString(1, scanner.getUid());
+			pstmt = conn.prepareStatement(Env.getProperty("SELECT_MEMBER"));
+
+			// 멤버 존재여부 확인
+			pstmt.setString(1, member.getUid());
 			ResultSet rs = pstmt.executeQuery();
-			int count = 0; 
+			int count = 0;
 			if (rs.next()) {
 				count = rs.getInt(1);
 			}
 			rs.close();
 			if (count != 0) {
-				throw new Member.ExistMember("[" + member.getUid() + "] 아이디가 존재합니다" );
+				throw new Member.ExistMember("[" + member.getUid() + "] 아이디가 존재합니다");
 			}
 			pstmt.close();
 			pstmt = conn.prepareStatement(Env.getProperty("UPDATE_MEMBER"));
 
-			//멤버 정보 설정 
-			
+			// 멤버 정보 설정
+
 			pstmt.setString(1, member.getPwd());
 			pstmt.setString(2, member.getName());
 			pstmt.setString(3, member.getSex());
@@ -154,7 +184,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 			pstmt.setString(5, member.getPhone());
 			pstmt.setString(6, member.getUid());
 			pstmt.executeUpdate();
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -182,6 +212,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 //			close();
 //		}		
 	}
+
 //
 	public void insertTest() {
 		String uid;
@@ -192,7 +223,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 		String phone;
 		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
 		Member member = new Member();
-		Scanner sc=new Scanner(System.in);
+		Scanner sc = new Scanner(System.in);
 		System.out.print("아이디 : ");
 		uid = sc.nextLine();
 		System.out.print("비번 : ");
@@ -205,8 +236,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 		address = sc.nextLine();
 		System.out.print("전화번호 : ");
 		phone = sc.nextLine();
-		
-		
+
 		try {
 			member.setUid(uid);
 			member.setPwd(pwd);
@@ -219,22 +249,22 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	private static void findByUidTest() {
-		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
-		try {
-			Member member = memberRepository.findByUid(memberRepository);
-			if (member != null) {
-				System.out.println(member.toString());
-			}
-		} catch (NotExistUidPwd e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
+//		try {
+//			Member member = memberRepository.findByUid(memberRepository);
+//			if (member != null) {
+//				System.out.println(member.toString());
+//			}
+//		} catch (NotExistUidPwd e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
-	
+
 	private static void updateTest() {
 		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
 		Member member = new Member();
@@ -251,10 +281,11 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 			e.printStackTrace();
 		}
 	}
-	public static void main(String []args) {
-		
-		//updateTest();
-		//findByUidTest();
+
+	public static void main(String[] args) {
+
+		// updateTest();
+		// findByUidTest();
 	}
 
 }
