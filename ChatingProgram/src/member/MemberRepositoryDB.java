@@ -276,6 +276,30 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 		}
 	}
 	
+	public void findPwd() {
+		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
+		
+		Scanner sc=new Scanner(System.in);
+		System.out.print("아이디 : ");
+		String uid = sc.nextLine();
+		System.out.print("이름 : ");
+		String name = sc.nextLine();
+	
+		try {
+			Member member = memberRepository.findByUid(uid);
+			if(name.equals(member.getName())){
+				String pwd=member.getPwd();
+			System.out.println("비밀번호:"+pwd);
+			}
+			else {
+				System.out.println("입력한 정보가 등록된 정보와 다릅니다");
+			}
+		}
+		catch (NotExistUidPwd e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}			
+	}	
 		
 		
 	
@@ -283,7 +307,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 		
 	
 		findByUidTest();
-		deleteTest();
+		
 	}
 
 }

@@ -538,7 +538,8 @@ public class ChatClient {
 					memberRepository.insertTest();
 					break;
 				case "3":
-					chatClient.passwdSearch(scanner);
+//					chatClient.passwdSearch(scanner);
+					memberRepository.findPwd();
 					break;
 				case "4":
 					memberRepository.deleteTest();
