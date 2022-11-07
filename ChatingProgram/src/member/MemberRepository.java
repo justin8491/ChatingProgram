@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import common.Member;
+
 public class MemberRepository {
 	List<Member> memberList = null;
 	Map<String, Member> memberMap = null;

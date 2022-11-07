@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.util.List;
 
+import common.Member;
+
 public class MemberDataRead {
 	//메소드: 메인
 	@SuppressWarnings("null")
