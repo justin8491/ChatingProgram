@@ -23,6 +23,7 @@ public class ChatClient {
 	DataInputStream dis;
 	DataOutputStream dos;
 	static String chatName;
+	static ChatClient chatClient = new ChatClient();
 
 	// 로그인 여부
 	static boolean logon = false;
@@ -263,7 +264,7 @@ public class ChatClient {
 	}
 
 	Scanner scanner = new Scanner(System.in);
-	ChatClient chatClient = new ChatClient();
+	
 	
 	private void chatJoin() {
 		try {
