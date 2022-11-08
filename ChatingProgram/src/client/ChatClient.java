@@ -34,6 +34,7 @@ public class ChatClient {
 	//객체 필드
 	static ChatClient chatClient = new ChatClient();
 	Scanner scanner = new Scanner(System.in);
+	Member member = new Member();
 
 	// 로그인 여부
 	public static boolean logon = false;
@@ -120,11 +121,11 @@ public class ChatClient {
 	public void loginSucessMenu() {
 		stop = false;
 		try {
-
+			MemberRepositoryDB memberRepository = new MemberRepositoryDB();
 			while (false == stop && logon == true) {
-				System.out.println("--------------------------------------------------");
+				System.out.println("-------------------------------------");
 				System.out.println("	" + chatName + " 님 환영합니다.");
-				System.out.println("--------------------------------------------------");
+				System.out.println("-------------------------------------");
 				System.out.println();
 				System.out.println("1. 채팅방 입장");
 				System.out.println("2. 나의 회원 정보");
@@ -141,7 +142,7 @@ public class ChatClient {
 					chatClient.chatJoin();
 					break;
 				case "2":
-					
+					memberRepository.detail(scanner, chatClient);
 					break;
 				case "3":
 					chatClient.updateMember(scanner);
@@ -421,7 +422,7 @@ public class ChatClient {
 				System.out.println("1. 로그인");
 				System.out.println("2. 회원가입");
 				System.out.println("3. 비밀번호검색");
-				System.out.println("4. 회원탈퇴");
+				System.out.println("5. 관리자페이지");
 				System.out.println("q. 프로그램 종료");
 				System.out.print("메뉴 선택 => ");
 
@@ -440,10 +441,11 @@ public class ChatClient {
 					memberRepository.insertTest(scanner);
 					break;
 				case "3":
-					chatClient.passwdSearch(scanner);
+//					chatClient.passwdSearch(scanner);
+					memberRepository.findPwd();
 					break;
-				case "4":
-					memberRepository.deleteTest(scanner);
+				case "5":
+					memberRepository.adminLogin();
 					break;
 				case "Q", "q":
 					scanner.close();
