@@ -376,6 +376,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 			int cnt=0;
 			 while(rs.next()){
 			cnt+=1;
+			System.out.println("-----------------------------------------------------------------------------");
 			System.out.println("# "+cnt);
 			System.out.print("아이디: "+rs.getString(1)+" ");
 			System.out.print("비밀번호: "+rs.getString(2)+" ");
