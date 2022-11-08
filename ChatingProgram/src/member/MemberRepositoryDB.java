@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import client.ChatClient;
 import member.Member;
 import member.Member.ExistMember;
 import member.Member.NotExistUidPwd;
@@ -190,18 +191,21 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 		
 	}
 	
-	private static void findByUidTest() {
+	private void findByUid() {
 		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
+		System.out.print("회원 아이디를 입력하세요 :");
+		Scanner sc=new Scanner(System.in);
+		String id=sc.nextLine();
 		try {
-			Member member = memberRepository.findByUid("6");
+			Member member = memberRepository.findByUid(id);
 			if (member != null) {
-				System.out.println(member.toString());
+				System.out.println("회원정보:"+member.toString());
 			}
 		} catch (NotExistUidPwd e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("아이디가 존재하지 않습니다");
 		}
 	}
+	
 	
 	private static void updateTest() {
 		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
@@ -300,13 +304,86 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 			e.printStackTrace();
 		}			
 	}	
+	public void adminLogin() {
+		Scanner sc=new Scanner(System.in);
+		System.out.print("아이디 : ");
+		String id = sc.nextLine();
+		System.out.print("비밀번호 : ");
+		String pwd = sc.nextLine();
+		if (id.equals(Env.getProperty("ADMIN_ID")) && pwd.equals(Env.getProperty("ADMIN_PWD"))) {
+			adminPage();
+		}
+		else {
+			System.out.print("아이디 혹은 비밀번호가 다릅니다");
+		}
 		
+		
+		
+	}
+	public void adminPage() {
+		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
+			boolean stop1 = false;
+			try {
+				while (false == stop1) {
+					System.out.println("--------------------------------------------------");
+					System.out.println(	" 관리자페이지 입니다.");
+					System.out.println("--------------------------------------------------");
+					System.out.println();
+					System.out.println("1. 회원목록 조회");
+					System.out.println("2. 회원 검색");
+					System.out.println("3. 관리자페이지 종료");
+					System.out.print("메뉴 선택 => ");
+					Scanner scanner = new Scanner(System.in);
+					String menu = scanner.nextLine();
+					switch (menu) {
+					case "1":
+						memberRepository.memberList();
+						break;
+					case "2":
+						memberRepository.findByUid();
+						break;
+					case "3":
+						stop1 = true;
+						System.out.println("초기화면으로 돌아갑니다");
+						break;
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		
 	
+	public void memberList() {
+		try {
+			
+			open();
+			pstmt = conn.prepareStatement(Env.getProperty("MEMBER_LIST"));
+			//멤버 존재여부 확인
+			ResultSet rs = pstmt.executeQuery();
+			int cnt=0;
+			 while(rs.next()){
+			cnt+=1;
+			System.out.println("# "+cnt);
+			System.out.print("아이디: "+rs.getString(1)+" ");
+			System.out.print("비밀번호: "+rs.getString(2)+" ");
+			System.out.print("이름: "+rs.getString(3)+" ");
+			System.out.print("전화번호: "+rs.getString(4)+" ");
+			System.out.print("성별: "+rs.getString(5)+" ");
+			System.out.print("주소: "+rs.getString(6)+" ");
+			System.out.println();
+			 }
+			 
+		}
+			catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				close();
+			}
+		
+	}
+		
 	public static void main(String []args) {
-		
-	
-		findByUidTest();
 		
 	}
 

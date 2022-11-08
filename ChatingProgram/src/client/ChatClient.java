@@ -520,6 +520,7 @@ public class ChatClient {
 				System.out.println("2. 회원가입");
 				System.out.println("3. 비밀번호검색");
 				System.out.println("4. 회원탈퇴");
+				System.out.println("5. 관리자페이지");
 				System.out.println("q. 프로그램 종료");
 				System.out.print("메뉴 선택 => ");
 
@@ -543,6 +544,9 @@ public class ChatClient {
 					break;
 				case "4":
 					memberRepository.deleteTest();
+					break;
+				case "5":
+					memberRepository.adminLogin();
 					break;
 				case "Q", "q":
 					scanner.close();
