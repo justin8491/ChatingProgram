@@ -131,24 +131,26 @@ public class SocketClient {
 	}
 
 	private void login(JSONObject jsonObject) {
-		String uid = jsonObject.getString("uid");
-		String pwd = jsonObject.getString("pwd");
-		JSONObject jsonResult = new JSONObject();
+		
+		Member member = new Member();
+//		String uid = jsonObject.getString("uid");
+//		String pwd = jsonObject.getString("pwd");
+//		JSONObject jsonResult = new JSONObject();
+//
+//		jsonResult.put("statusCode", "-1");
+//		jsonResult.put("message", "로그인 아이디가 존재하지 않습니다");
+//
+//		try {
+//			Member member = chatServer.findByUid(uid);
+//			if (null != member && pwd.equals(member.getPwd())) {
+//				jsonResult.put("statusCode", "0");
+//				jsonResult.put("message", "로그인 성공");
+//			}
+//		} catch (Member.NotExistUidPwd e) {
+//			e.printStackTrace();
+//		}
 
-		jsonResult.put("statusCode", "-1");
-		jsonResult.put("message", "로그인 아이디가 존재하지 않습니다");
-
-		try {
-			Member member = chatServer.findByUid(uid);
-			if (null != member && pwd.equals(member.getPwd())) {
-				jsonResult.put("statusCode", "0");
-				jsonResult.put("message", "로그인 성공");
-			}
-		} catch (Member.NotExistUidPwd e) {
-			e.printStackTrace();
-		}
-
-		send(jsonResult.toString());
+//		send(jsonResult.toString());
 
 		close();
 	}

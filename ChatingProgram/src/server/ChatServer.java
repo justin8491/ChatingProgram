@@ -9,9 +9,13 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,20 +23,25 @@ import java.util.concurrent.Executors;
 import org.json.JSONObject;
 
 import member.Member;
+import member.Member.ExistMember;
+import member.Member.NotExistUidPwd;
 import member.MemberRepository;
+import member.MemberRepositoryDB;
+import member.MemberRepositoryForDB;
 
 
-public class ChatServer {
+public class ChatServer implements MemberRepositoryForDB{
 	static //필드
 	ServerSocket serverSocket;
 	ExecutorService threadPool = Executors.newFixedThreadPool(100);
 	Map<String, SocketClient> chatRoom = Collections.synchronizedMap(new HashMap<>());
-	MemberRepository memberRepository = new MemberRepository();
+	MemberRepositoryDB memberRepository = new MemberRepositoryDB();
 	
 	//메소드: 서버 시작
 	public void start() throws IOException {
 		
-		memberRepository.loadMember();
+		//멤버 로드
+		//memberRepository.loadMember();
 		
 		serverSocket = new ServerSocket(50001);	
 		System.out.println( "[서버] 시작됨test");
@@ -44,6 +53,7 @@ public class ChatServer {
 					SocketClient sc = new SocketClient(this, socket);
 				}
 			} catch(IOException e) {
+				
 			}
 		});
 		thread.start();
@@ -66,16 +76,17 @@ public class ChatServer {
 	//메소드: 모든 클라이언트에게 메시지 보냄 + 귓속말
 	public void sendToAll(SocketClient sender, String message) {
 		JSONObject root = new JSONObject();
-		root.put("clientIp", sender.clientIp);
-		root.put("chatName", sender.chatName);
-		root.put("message", message);
-		String json = root.toString();
+		
 		
 		// 귓속말 조건
 		if(message.indexOf("/") == 0) {
 			int pos = message.indexOf(" ");
 			String key = message.substring(1, pos); // chatName 타겟 키
 			message = "(귓)" + message.substring(pos+1);
+			root.put("clientIp", sender.clientIp);
+			root.put("chatName", sender.chatName);
+			root.put("message", message);
+			String json = root.toString();
 			
 			//타겟 닉네임
 			//소켓 클라이언트 변수에 채팅방 values를 대입
@@ -85,12 +96,21 @@ public class ChatServer {
 					socketClient.send(json);
 				}
 			}
+		}else {
+			root.put("clientIp", sender.clientIp);
+			root.put("chatName", sender.chatName);
+			root.put("message", message);
+			String json = root.toString();
+			
+			chatRoom.values().stream()
+			.filter(socketClient -> socketClient != sender)
+			.forEach(socketClient -> socketClient.send(json));
 		}
 		
 		
-		chatRoom.values().stream()
-		.filter(socketClient -> socketClient != sender)
-		.forEach(socketClient -> socketClient.send(json));
+		
+		
+		
 	}	
 	//메소드: 서버 종료
 	public void stop() {
@@ -102,38 +122,33 @@ public class ChatServer {
 		} catch (IOException e1) {}
 	}
 	
-	public synchronized void registerMember(Member member) throws Member.ExistMember {
-		memberRepository.insertMember(member);
+	
+	@Override
+	public void login(String uid) throws NotExistUidPwd {
+		// TODO Auto-generated method stub
+		
 	}
 	
-	public synchronized Member findByUid(String uid) throws Member.NotExistUidPwd {
+	//메소드 : INSERT
+	@Override
+	public void registerMember(Member member) throws ExistMember {
+		memberRepository.insertMember(member);
+		
+	}
+	
+	//메소드 : SELECT
+	@Override
+	public Member findByUid(String uid) throws NotExistUidPwd {
 		return memberRepository.findByUid(uid);
 	}
 	
-	public void fileUpload() throws IOException {
-		Socket sock=serverSocket.accept();
-		DataInputStream dis=new DataInputStream(sock.getInputStream());
-		String fileName=dis.readUTF();
-		String path="c:\\down";
-		File Folder=new File(path);
-		if(!Folder.exists()) {
-		try {Folder.mkdir();
-		}
-	catch(Exception e) {e.getStackTrace();}}
-	FileOutputStream fos=new FileOutputStream("c:\\down\\"+fileName);
-	byte[] b=new byte[1024];
-	int n=0;
-	while((n=dis.read(b))!=-1) {
-		fos.write(b,0,n);
+	//메소드 : UPDATE
+	@Override
+	public void updateMember(Member member) throws NotExistUidPwd {
+		memberRepository.updateMember(member);
+		
 	}
 	
-	fos.close();
-	dis.close();
-	sock.close();
-	System.out.println("파일수신 완료");
-
-}
-
 	
 	
 	
@@ -158,6 +173,7 @@ public class ChatServer {
 	public static void main(String[] args) {	
 		try {
 			ChatServer chatServer = new ChatServer();
+			//chatServer.oracleDBConnect();
 			chatServer.start();
 			
 			System.out.println("----------------------------------------------------");
@@ -176,4 +192,9 @@ public class ChatServer {
 			System.out.println("[서버] " + e.getMessage());
 		}
 	}
+	
+
+	
+	
+	
 }
