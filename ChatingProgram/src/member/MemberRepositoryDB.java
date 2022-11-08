@@ -1,33 +1,17 @@
 package member;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 import client.ChatClient;
-import member.Member;
 import member.Member.ExistMember;
 import member.Member.NotExistUidPwd;
-import member.Env;
 
 public class MemberRepositoryDB implements MemberRepositoryForDB{
-//	List<Member> memberList = null;
-//	Map<String, Member> memberMap = null;
 	Connection conn = null;
 	PreparedStatement pstmt = null;
 	ChatClient chatClient = new ChatClient();
@@ -318,7 +302,6 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 		try {
 			memberRepository.updateMember(member);
 		} catch (NotExistUidPwd e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -332,8 +315,8 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 		String pwd = sc.nextLine();
 	
 		try {
-			if(pwd.equals(member.getPwd())){
 			Member member = memberRepository.findByUid(uid);
+			if(pwd.equals(member.getPwd())){
 			memberRepository.deleteMember(member);
 			System.out.println("탈퇴 완료");
 			}
@@ -342,9 +325,11 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 			}
 		}
 		catch (NotExistUidPwd e) {
-			// TODO Auto-generated catch block
-		}			
 			e.printStackTrace();
+		}finally {
+			close();
+		}
+			
 	}
 	public synchronized void deleteMember(Member member) throws Member.NotExistUidPwd{
 		
@@ -452,8 +437,8 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 			int cnt=0;
 			 while(rs.next()){
 			cnt+=1;
-			System.out.println("-----------------------------------------------------------------------------");
-			System.out.println("# "+cnt);
+			//System.out.println("-----------------------------------------------------------------------------");
+			System.out.print("# "+cnt + "\t" );
 			System.out.print("아이디: "+rs.getString(1)+" ");
 			System.out.print("비밀번호: "+rs.getString(2)+" ");
 			System.out.print("이름: "+rs.getString(3)+" ");
@@ -512,7 +497,6 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 
 	@Override
 	public void insertTest(Scanner scanner, Member member) throws ExistMember {
-		// TODO Auto-generated method stub
 		
 	}
 
