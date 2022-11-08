@@ -23,6 +23,7 @@ import client.ChatClient;
 import member.Member;
 import member.Member.ExistMember;
 import member.Member.NotExistUidPwd;
+import member.Env;
 
 public class MemberRepositoryDB implements MemberRepositoryForDB{
 //	List<Member> memberList = null;
@@ -276,7 +277,35 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 		}
 
 	}
-
+	
+	private void findByUidforAdmin() {
+		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
+		System.out.print("회원 아이디를 입력하세요 :");
+		Scanner sc=new Scanner(System.in);
+		String id=sc.nextLine();
+		try {
+			Member member = memberRepository.findByUid(id);
+			if (member != null) {
+				System.out.println("아이디:"+member.getUid());
+				System.out.println("패스워드:"+member.getPwd());
+				System.out.println("이름:"+member.getName());
+				System.out.println("전화번호:"+member.getPhone());
+				System.out.println("성별:"+member.getSex());
+				System.out.println("주소:"+member.getAddress());
+				String register=member.getExist();
+				if (register.equals("1")){
+					System.out.println("탈퇴여부 : X");}
+				else {
+					System.out.println("탈퇴여부 : O");
+				}
+				
+			}
+		} catch (NotExistUidPwd e) {
+			System.out.println("아이디가 존재하지 않습니다");
+		}
+	}
+	
+	
 	private static void updateTest() {
 		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
 		Member member = new Member();
@@ -293,72 +322,159 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 			e.printStackTrace();
 		}
 	}
-
 	public void deleteTest(Scanner scanner) {
 		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
-
+		
+		Scanner sc=new Scanner(System.in);
 		System.out.print("아이디 : ");
-		String uid = scanner.nextLine();
+		String uid = sc.nextLine();
 		System.out.print("비번 : ");
-		String pwd = scanner.nextLine();
-
+		String pwd = sc.nextLine();
+	
 		try {
+			if(pwd.equals(member.getPwd())){
 			Member member = memberRepository.findByUid(uid);
-			if (pwd.equals(member.getPwd())) {
-				memberRepository.deleteMember(member);
-				System.out.println("탈퇴 완료");
-			} else {
+			memberRepository.deleteMember(member);
+			System.out.println("탈퇴 완료");
+			}
+			else {
 				System.out.println("아이디나 비밀번호가 존재하지 않습니다");
 			}
-		} catch (NotExistUidPwd e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
+		catch (NotExistUidPwd e) {
+			// TODO Auto-generated catch block
+		}			
+			e.printStackTrace();
 	}
-
-	public synchronized void deleteMember(Member member) throws Member.NotExistUidPwd {
-
+	public synchronized void deleteMember(Member member) throws Member.NotExistUidPwd{
+		
 		try {
 			open();
+			
+			pstmt = conn.prepareStatement(Env.getProperty("EXIST_MEMBER"));
 
-			pstmt = conn.prepareStatement(Env.getProperty("SELECT_MEMBER"));
-
-			// 멤버 존재여부 확인
+			//멤버 존재여부 확인
 			pstmt.setString(1, member.getUid());
 			ResultSet rs = pstmt.executeQuery();
-			int count = 0;
+			int count = 0; 
 			if (rs.next()) {
 				count = rs.getInt(1);
 			}
 			rs.close();
 			if (count == 0) {
-				throw new Member.ExistMember("[" + member.getUid() + "] 아이디가 없습니다");
+				throw new Member.ExistMember("[" + member.getUid() + "] 아이디가 없습니다" );
 			}
 			pstmt.close();
 			pstmt = conn.prepareStatement(Env.getProperty("DELETE_MEMBER"));
 
-			// 멤버 정보 설정
+			//멤버 정보 설정 
 			pstmt.setString(1, member.getUid());
 			pstmt.setString(2, member.getPwd());
-			System.out.println("-------------" + pstmt.toString());
 			pstmt.executeUpdate();
-
 		} catch (Exception e) {
 			e.printStackTrace();
-
 		} finally {
 			close();
 		}
 	}
-	
+	public void findPwd() {
+		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
+		Scanner sc=new Scanner(System.in);
+		System.out.print("아이디 : ");
+		String uid = sc.nextLine();
+		System.out.print("이름 : ");
+		String name = sc.nextLine();
+		try {
+			Member member = memberRepository.findByUid(uid);
+			if(name.equals(member.getName())){
+				String pwd=member.getPwd();
+			System.out.println("비밀번호:"+pwd);
+			}
+			else {
+				System.out.println("입력한 정보가 등록된 정보와 다릅니다");
+			}
+		}
+		catch (NotExistUidPwd e) {
+			e.printStackTrace();
+		}			
+	}	
+	public void adminLogin() {
+		Scanner sc=new Scanner(System.in);
+		System.out.print("아이디 : ");
+		String id = sc.nextLine();
+		System.out.print("비밀번호 : ");
+		String pwd = sc.nextLine();
+		if (id.equals(Env.getProperty("ADMIN_ID")) && pwd.equals(Env.getProperty("ADMIN_PWD"))) {
+			adminPage();
+		}
+		else {
+			System.out.print("아이디 혹은 비밀번호가 다릅니다");
+		}
+	}
+	public void adminPage() {
+		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
+			boolean stop1 = false;
+			try {
+				while (false == stop1) {
+					System.out.println("--------------------------------------------------");
+					System.out.println(	" 관리자페이지 입니다.");
+					System.out.println("--------------------------------------------------");
+					System.out.println("1. 회원목록 조회");
+					System.out.println();
+					System.out.println("2. 회원 검색");
+					System.out.println("3. 관리자페이지 종료");
+					System.out.print("메뉴 선택 => ");
+					Scanner scanner = new Scanner(System.in);
+					String menu = scanner.nextLine();
+					switch (menu) {
+					case "1":
+						memberRepository.memberList();
+						break;
+					case "2":
+						memberRepository.findByUidforAdmin();
+						break;
+					case "3":
+						stop1 = true;
+						System.out.println("초기화면으로 돌아갑니다");
+						break;
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	public void memberList() {
+		try {
+			open();
+			pstmt = conn.prepareStatement(Env.getProperty("MEMBER_LIST"));
+			//멤버 존재여부 확인
+			ResultSet rs = pstmt.executeQuery();
+			int cnt=0;
+			 while(rs.next()){
+			cnt+=1;
+			System.out.println("-----------------------------------------------------------------------------");
+			System.out.println("# "+cnt);
+			System.out.print("아이디: "+rs.getString(1)+" ");
+			System.out.print("비밀번호: "+rs.getString(2)+" ");
+			System.out.print("이름: "+rs.getString(3)+" ");
+			System.out.print("전화번호: "+rs.getString(4)+" ");
+			System.out.print("성별: "+rs.getString(5)+" ");
+			System.out.print("주소: "+rs.getString(6)+" ");
+			System.out.println();
+			 }
+		}
+			catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				close();
+			}
+	}
 	@Override
 	public void detail(Scanner scanner, ChatClient chatClient) throws NotExistUidPwd {
 		try {
 			open();
 			MemberRepositoryDB memberRepository = new MemberRepositoryDB();
-			
 			Member member = memberRepository.findByName(chatClient.chatName);
-			
 			pstmt = conn.prepareStatement(Env.getProperty("DETAIL_MEMBER"));
 			System.out.println("-------------------------------------");
 			System.out.println("	" + chatClient.chatName + " 님의 회원정보");
@@ -369,8 +485,6 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 			System.out.println("4. 성별 : " + member.getSex());
 			System.out.println("5. 전화번호 : " + member.getPhone());
 			System.out.println("6. 주소 : " + member.getAddress());
-			
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("------------- 실패 사유 : " + e.getMessage());
