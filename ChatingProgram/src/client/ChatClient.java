@@ -23,16 +23,16 @@ import member.Member.NotExistUidPwd;
 import member.MemberRepositoryDB;
 import member.MemberRepositoryForDB;
 
-public class ChatClient implements MemberRepositoryForDB{
+public class ChatClient {
 	// 필드
 	Socket socket;
 	DataInputStream dis;
 	DataOutputStream dos;
 	public static String chatName;
-	static ChatClient chatClient = new ChatClient();
 	
-//	// 타켓 PRIMARY_KEY
-//	String PRIMARY_KEY = "";
+	//객체 필드
+	static ChatClient chatClient = new ChatClient();
+	Scanner scanner = new Scanner(System.in);
 
 	// 로그인 여부
 	public static boolean logon = false;
@@ -87,7 +87,7 @@ public class ChatClient implements MemberRepositoryForDB{
 			uid = scanner.nextLine();
 
 			connect();
-
+			
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("command", "passwdSearch");
 			jsonObject.put("uid", uid);
@@ -114,7 +114,8 @@ public class ChatClient implements MemberRepositoryForDB{
 			System.out.println(message);
 		}
 	}
-
+	
+	
 	public void loginSucessMenu() {
 		stop = false;
 		try {
@@ -125,10 +126,11 @@ public class ChatClient implements MemberRepositoryForDB{
 				System.out.println("--------------------------------------------------");
 				System.out.println();
 				System.out.println("1. 채팅방 입장");
-				System.out.println("2. 회원정보수정");
-				System.out.println("3. 파일 업로드");
-				System.out.println("4. 파일 목록 조회");
-				System.out.println("5. 파일 다운로드");
+				System.out.println("2. 나의 회원 정보");
+				System.out.println("3. 회원정보수정");
+				System.out.println("4. 파일 업로드");
+				System.out.println("5. 파일 목록 조회");
+				System.out.println("6. 파일 다운로드");
 				System.out.println("q. 프로그램 종료");
 				System.out.print("메뉴 선택 => ");
 				Scanner scanner = new Scanner(System.in);
@@ -138,15 +140,18 @@ public class ChatClient implements MemberRepositoryForDB{
 					chatClient.chatJoin();
 					break;
 				case "2":
-					chatClient.updateMember(scanner);
+					
 					break;
 				case "3":
-					chatClient.fileUpload(scanner);
+					chatClient.updateMember(scanner);
 					break;
 				case "4":
-					chatClient.fileListRequest(scanner);
+					chatClient.fileUpload(scanner);
 					break;
 				case "5":
+					chatClient.fileListRequest(scanner);
+					break;
+				case "6":
 					chatClient.fileDownload(scanner);
 					break;
 				case "Q", "q":
@@ -163,7 +168,7 @@ public class ChatClient implements MemberRepositoryForDB{
 		}
 	}
 	
-	Scanner scanner = new Scanner(System.in);
+	
 	
 	
 	private void chatJoin() {
@@ -424,22 +429,22 @@ public class ChatClient implements MemberRepositoryForDB{
 				// 스캐너
 				Scanner scanner = new Scanner(System.in);
 				String menuNum = scanner.nextLine();
-
+				
 				switch (menuNum) {
 				case "1":
-					memberRepository.login();
+					memberRepository.login(scanner);
 					if (logon == true) {
 						stop = true;
 					}
 					break;
 				case "2":
-					memberRepository.insertTest();
+					memberRepository.insertTest(scanner);
 					break;
 				case "3":
 					chatClient.passwdSearch(scanner);
 					break;
 				case "4":
-					memberRepository.deleteTest();
+					memberRepository.deleteTest(scanner);
 					break;
 				case "Q", "q":
 					scanner.close();
@@ -457,30 +462,5 @@ public class ChatClient implements MemberRepositoryForDB{
 		}
 	}
 
-
-
-	@Override
-	public Member findByUid(String uid) throws NotExistUidPwd {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void updateMember(Member member) throws NotExistUidPwd {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void login(String uid) throws NotExistUidPwd {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void registerMember(Member member) throws ExistMember {
-		// TODO Auto-generated method stub
-		
-	}
 
 }

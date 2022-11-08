@@ -44,8 +44,17 @@ public class MemberRepositoryDB {
 		}
 
 	}
-
-	public synchronized void login() {
+	
+	/**
+	 * 로그인(login)
+	 * MemberRepositoryDB 객체로 id 값을 member에 대입 후 
+	 * 해당 id 값이 입력한 값과 맞는지 확인 후 성공 or 실패
+	 * 회원탈퇴 계정은 로그인 되지 않는다.
+	 * @param scanner
+	 * String exist = member.getExist();
+	 * if(exist.equals("0")){...} // 회원 = 1, 회원탈퇴 = 0
+	 */
+	public synchronized void login(Scanner scanner) {
 		try {
 			MemberRepositoryDB memberrepository = new MemberRepositoryDB();
 			Member member = new Member();
@@ -53,24 +62,27 @@ public class MemberRepositoryDB {
 			System.out.println("\n1. 로그인 작업");
 			System.out.print("아이디 : ");
 			String uid = scanner.nextLine();
+			System.out.println();
 			System.out.print("비밀번호 : ");
 			String pwd = scanner.next();
 			member = memberrepository.findByUid(uid);
-			if(!pwd.equals(member.getPwd())) {
+			
+			String exist = member.getExist();
+			System.out.println();
+			if (!pwd.equals(member.getPwd()) || exist.equals("0")) {
 				System.out.println("로그인 실패");
-			}else {
+			} else {
 				System.out.println("로그인 성공");
 				chatClient.chatName = member.getName();
 				chatClient.connect();
 				chatClient.logon = true;
 			}
-			
-			
 
 		} catch (Exception e) {
-			// TODO: handle exception
-		}
-
+			System.out.println("------------- 실패 사유 : " + e.getMessage());
+		} finally {
+			close();
+		} 		
 	}
 
 	private void close() {
@@ -119,6 +131,7 @@ public class MemberRepositoryDB {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.out.println("------------- 실패 사유 : " + e.getMessage());
 		} finally {
 			close();
 		}
@@ -141,7 +154,7 @@ public class MemberRepositoryDB {
 				member.setSex(rs.getString("SEX"));
 				member.setAddress(rs.getString("ADDRESS"));
 				member.setPhone(rs.getString("PHONE"));
-				member.setExist(rs.getString("EXIST")); 
+				member.setExist(rs.getString("EXIST"));
 				rs.close();
 				return member;
 			} else {
@@ -149,6 +162,7 @@ public class MemberRepositoryDB {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.out.println("------------- 실패 사유 : " + e.getMessage());
 		} finally {
 			close();
 		}
@@ -184,7 +198,7 @@ public class MemberRepositoryDB {
 			pstmt.setString(4, member.getAddress());
 			pstmt.setString(5, member.getPhone());
 			pstmt.setString(6, member.getUid());
-			
+
 			pstmt.executeUpdate();
 
 		} catch (Exception e) {
@@ -195,8 +209,7 @@ public class MemberRepositoryDB {
 
 	}
 
-
-	public void insertTest() {
+	public void insertTest(Scanner scanner) {
 		String uid;
 		String pwd;
 		String name;
@@ -205,19 +218,18 @@ public class MemberRepositoryDB {
 		String phone;
 		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
 		Member member = new Member();
-		Scanner sc = new Scanner(System.in);
 		System.out.print("아이디 : ");
-		uid = sc.nextLine();
+		uid = scanner.nextLine();
 		System.out.print("비번 : ");
-		pwd = sc.nextLine();
+		pwd = scanner.nextLine();
 		System.out.print("이름 : ");
-		name = sc.nextLine();
+		name = scanner.nextLine();
 		System.out.print("성별[남자(M)/여자(F)] : ");
-		sex = sc.nextLine();
+		sex = scanner.nextLine();
 		System.out.print("주소 : ");
-		address = sc.nextLine();
+		address = scanner.nextLine();
 		System.out.print("전화번호 : ");
-		phone = sc.nextLine();
+		phone = scanner.nextLine();
 
 		try {
 			member.setUid(uid);
@@ -228,13 +240,11 @@ public class MemberRepositoryDB {
 			member.setPhone(phone);
 			memberRepository.insertMember(member);
 		} catch (ExistMember e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			
 		}
 
 	}
-
-
 
 	private static void updateTest() {
 		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
@@ -253,66 +263,63 @@ public class MemberRepositoryDB {
 		}
 	}
 
-	public void deleteTest() { 
-		MemberRepositoryDB memberRepository = new MemberRepositoryDB(); 
-		 
-		Scanner sc=new Scanner(System.in); 
-		System.out.print("아이디 : "); 
-		String uid = sc.nextLine(); 
-		System.out.print("비번 : "); 
-		String pwd = sc.nextLine(); 
-	 
-		try { 
-			Member member = memberRepository.findByUid(uid); 
-			if(pwd.equals(member.getPwd())){ 
-			memberRepository.deleteMember(member); 
-			System.out.println("탈퇴 완료"); 
-			} 
-			else { 
-				System.out.println("아이디나 비밀번호가 존재하지 않습니다"); 
-			} 
-		} 
-		catch (NotExistUidPwd e) { 
-			// TODO Auto-generated catch block 
-			e.printStackTrace(); 
-		}			 
-	} 
-	public synchronized void deleteMember(Member member) throws Member.NotExistUidPwd{ 
-		 
-		try { 
-			open(); 
-			 
-			pstmt = conn.prepareStatement(Env.getProperty("SELECT_MEMBER")); 
- 
-			//멤버 존재여부 확인 
-			pstmt.setString(1, member.getUid()); 
-			ResultSet rs = pstmt.executeQuery(); 
-			int count = 0;  
-			if (rs.next()) { 
-				count = rs.getInt(1); 
-			} 
-			rs.close(); 
-			if (count == 0) { 
-				throw new Member.ExistMember("[" + member.getUid() + "] 아이디가 없습니다" ); 
-			} 
-			pstmt.close(); 
-			pstmt = conn.prepareStatement(Env.getProperty("DELETE_MEMBER")); 
- 
-			//멤버 정보 설정  
-			pstmt.setString(1, member.getUid()); 
+	public void deleteTest(Scanner scanner) {
+		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
+
+		System.out.print("아이디 : ");
+		String uid = scanner.nextLine();
+		System.out.print("비번 : ");
+		String pwd = scanner.nextLine();
+
+		try {
+			Member member = memberRepository.findByUid(uid);
+			if (pwd.equals(member.getPwd())) {
+				memberRepository.deleteMember(member);
+				System.out.println("탈퇴 완료");
+			} else {
+				System.out.println("아이디나 비밀번호가 존재하지 않습니다");
+			}
+		} catch (NotExistUidPwd e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public synchronized void deleteMember(Member member) throws Member.NotExistUidPwd {
+
+		try {
+			open();
+
+			pstmt = conn.prepareStatement(Env.getProperty("SELECT_MEMBER"));
+
+			// 멤버 존재여부 확인
+			pstmt.setString(1, member.getUid());
+			ResultSet rs = pstmt.executeQuery();
+			int count = 0;
+			if (rs.next()) {
+				count = rs.getInt(1);
+			}
+			rs.close();
+			if (count == 0) {
+				throw new Member.ExistMember("[" + member.getUid() + "] 아이디가 없습니다");
+			}
+			pstmt.close();
+			pstmt = conn.prepareStatement(Env.getProperty("DELETE_MEMBER"));
+
+			// 멤버 정보 설정
+			pstmt.setString(1, member.getUid());
 			pstmt.setString(2, member.getPwd());
 			System.out.println("-------------" + pstmt.toString());
-			pstmt.executeUpdate(); 
-			
-			
-		} catch (Exception e) { 
+			pstmt.executeUpdate();
+
+		} catch (Exception e) {
 			e.printStackTrace();
 
-		} finally { 
-			close(); 
-		} 
-	} 
-	
+		} finally {
+			close();
+		}
+	}
+
 	public static void main(String[] args) {
 
 		// updateTest();
