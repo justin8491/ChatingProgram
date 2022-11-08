@@ -19,7 +19,6 @@ public class Member implements Serializable{
 	private String pwd;
 	private String name;
 	private String phone;
-//	private String email;
 	private String sex;
 	private String address;
 	private String exist;
@@ -32,7 +31,6 @@ public class Member implements Serializable{
 		this.uid = uid;
 		this.pwd = pwd;
 		this.name = name;
-//		this.email = email;
 		this.phone = phone;
 		this.sex = sex;
 		this.address = address;
@@ -45,7 +43,6 @@ public class Member implements Serializable{
 		pwd = jsonObject.getString("pwd");
 		name = jsonObject.getString("name");
 		sex = jsonObject.getString("sex");
-//		email = jsonObject.getString("email");
 		phone = jsonObject.getString("phone");
 		address = jsonObject.getString("address");
 	}

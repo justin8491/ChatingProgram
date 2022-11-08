@@ -8,14 +8,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,42 +18,24 @@ import java.util.concurrent.Executors;
 import org.json.JSONObject;
 
 import member.Member;
-import member.MemberRepository;
+import member.Member.ExistMember;
+import member.Member.NotExistUidPwd;
+import member.MemberRepositoryDB;
+import member.MemberRepositoryForDB;
 
 
-public class ChatServer {
+public class ChatServer{
 	static //필드
 	ServerSocket serverSocket;
 	ExecutorService threadPool = Executors.newFixedThreadPool(100);
 	Map<String, SocketClient> chatRoom = Collections.synchronizedMap(new HashMap<>());
-	MemberRepository memberRepository = new MemberRepository();
-	
-	//DB 연결
-	public void oracleDBConnect() {
-		try {
-			Properties prop = new Properties();
-			prop.load(new FileInputStream("db.properties"));
-			
-			Class.forName(prop.getProperty("driverClass"));
-			System.out.println("JDBC 드라이버 로딩 성공");
-			
-			Connection conn = DriverManager.getConnection(prop.getProperty("dbServerConn")
-					, prop.getProperty("dbUser")
-					, prop.getProperty("dbPasswd"));
-			
-			System.out.println("DB 서버에 연결됨");
-		} catch (Exception e) {
-			// TODO: handle exception
-			System.out.println("DB 연결 실패");
-			System.out.println(e.getMessage());
-		}
-			
-	}
+	MemberRepositoryDB memberRepository = new MemberRepositoryDB();
 	
 	//메소드: 서버 시작
 	public void start() throws IOException {
 		
-		memberRepository.loadMember();
+		//멤버 로드
+		//memberRepository.loadMember();
 		
 		serverSocket = new ServerSocket(50001);	
 		System.out.println( "[서버] 시작됨test");
@@ -139,15 +116,29 @@ public class ChatServer {
 		} catch (IOException e1) {}
 	}
 	
-	public synchronized void registerMember(Member member) throws Member.ExistMember {
-		memberRepository.insertMember(member);
+	
+	public void login(String uid) throws NotExistUidPwd {
+		// TODO Auto-generated method stub
+		
 	}
 	
-	public synchronized Member findByUid(String uid) throws Member.NotExistUidPwd {
+	//메소드 : INSERT
+	public void insertTest(Member member) throws ExistMember {
+		memberRepository.insertMember(member);
+		
+	}
+	
+	//메소드 : SELECT
+	public Member findByUid(String uid) throws NotExistUidPwd {
 		return memberRepository.findByUid(uid);
 	}
 	
-
+	//메소드 : UPDATE
+	public void updateMember(Member member) throws NotExistUidPwd {
+		memberRepository.updateMember(member);
+		
+	}
+	
 	
 	
 	
@@ -172,7 +163,7 @@ public class ChatServer {
 	public static void main(String[] args) {	
 		try {
 			ChatServer chatServer = new ChatServer();
-			chatServer.oracleDBConnect();
+			//chatServer.oracleDBConnect();
 			chatServer.start();
 			
 			System.out.println("----------------------------------------------------");
@@ -191,4 +182,9 @@ public class ChatServer {
 			System.out.println("[서버] " + e.getMessage());
 		}
 	}
+	
+
+	
+	
+	
 }
