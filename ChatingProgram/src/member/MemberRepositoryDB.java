@@ -191,7 +191,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 		
 	}
 	
-	private void findByUid() {
+	private void findByUidforAdmin() {
 		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
 		System.out.print("회원 아이디를 입력하세요 :");
 		Scanner sc=new Scanner(System.in);
@@ -199,7 +199,19 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 		try {
 			Member member = memberRepository.findByUid(id);
 			if (member != null) {
-				System.out.println("회원정보:"+member.toString());
+				System.out.println("아이디:"+member.getUid());
+				System.out.println("패스워드:"+member.getPwd());
+				System.out.println("이름:"+member.getName());
+				System.out.println("전화번호:"+member.getPhone());
+				System.out.println("성별:"+member.getSex());
+				System.out.println("주소:"+member.getAddress());
+				String register=member.getExist();
+				if (register.equals("1")){
+					System.out.println("탈퇴여부 : X");}
+				else {
+					System.out.println("탈퇴여부 : O");
+				}
+				
 			}
 		} catch (NotExistUidPwd e) {
 			System.out.println("아이디가 존재하지 않습니다");
@@ -340,7 +352,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 						memberRepository.memberList();
 						break;
 					case "2":
-						memberRepository.findByUid();
+						memberRepository.findByUidforAdmin();
 						break;
 					case "3":
 						stop1 = true;
