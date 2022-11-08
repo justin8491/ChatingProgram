@@ -8,14 +8,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,12 +20,11 @@ import org.json.JSONObject;
 import member.Member;
 import member.Member.ExistMember;
 import member.Member.NotExistUidPwd;
-import member.MemberRepository;
 import member.MemberRepositoryDB;
 import member.MemberRepositoryForDB;
 
 
-public class ChatServer implements MemberRepositoryForDB{
+public class ChatServer{
 	static //필드
 	ServerSocket serverSocket;
 	ExecutorService threadPool = Executors.newFixedThreadPool(100);
@@ -123,27 +117,23 @@ public class ChatServer implements MemberRepositoryForDB{
 	}
 	
 	
-	@Override
 	public void login(String uid) throws NotExistUidPwd {
 		// TODO Auto-generated method stub
 		
 	}
 	
 	//메소드 : INSERT
-	@Override
-	public void registerMember(Member member) throws ExistMember {
+	public void insertTest(Member member) throws ExistMember {
 		memberRepository.insertMember(member);
 		
 	}
 	
 	//메소드 : SELECT
-	@Override
 	public Member findByUid(String uid) throws NotExistUidPwd {
 		return memberRepository.findByUid(uid);
 	}
 	
 	//메소드 : UPDATE
-	@Override
 	public void updateMember(Member member) throws NotExistUidPwd {
 		memberRepository.updateMember(member);
 		

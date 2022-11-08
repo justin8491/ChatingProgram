@@ -24,7 +24,7 @@ import member.Member;
 import member.Member.ExistMember;
 import member.Member.NotExistUidPwd;
 
-public class MemberRepositoryDB {
+public class MemberRepositoryDB implements MemberRepositoryForDB{
 //	List<Member> memberList = null;
 //	Map<String, Member> memberMap = null;
 	Connection conn = null;
@@ -62,11 +62,10 @@ public class MemberRepositoryDB {
 			System.out.println("\n1. 로그인 작업");
 			System.out.print("아이디 : ");
 			String uid = scanner.nextLine();
-			System.out.println();
 			System.out.print("비밀번호 : ");
 			String pwd = scanner.next();
 			member = memberrepository.findByUid(uid);
-			
+
 			String exist = member.getExist();
 			System.out.println();
 			if (!pwd.equals(member.getPwd()) || exist.equals("0")) {
@@ -159,6 +158,38 @@ public class MemberRepositoryDB {
 				return member;
 			} else {
 				throw new Member.NotExistUidPwd("[" + uid + "] 아이디가 존재하지 않습니다");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("------------- 실패 사유 : " + e.getMessage());
+		} finally {
+			close();
+		}
+		return null;
+	}
+	
+	public Member findByName(String name) throws Member.NotExistUidPwd {
+		try {
+			open();
+			
+			pstmt = conn.prepareStatement(Env.getProperty("findByName_Member"));
+			
+			// 멤버 존재여부 확인
+			pstmt.setString(1, name);
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				Member member = new Member();
+				member.setUid(rs.getString("USERID"));
+				member.setPwd(rs.getString("PWD"));
+				member.setName(rs.getString("NAME"));
+				member.setSex(rs.getString("SEX"));
+				member.setAddress(rs.getString("ADDRESS"));
+				member.setPhone(rs.getString("PHONE"));
+				member.setExist(rs.getString("EXIST"));
+				rs.close();
+				return member;
+			} else {
+				throw new Member.NotExistUidPwd("[" + name + "] 님의 정보가 존재하지 않습니다");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -319,11 +350,60 @@ public class MemberRepositoryDB {
 			close();
 		}
 	}
-
+	
+	@Override
+	public void detail(Scanner scanner, ChatClient chatClient) throws NotExistUidPwd {
+		try {
+			open();
+			MemberRepositoryDB memberRepository = new MemberRepositoryDB();
+			
+			Member member = memberRepository.findByName(chatClient.chatName);
+			
+			pstmt = conn.prepareStatement(Env.getProperty("DETAIL_MEMBER"));
+			System.out.println("-------------------------------------");
+			System.out.println("	" + chatClient.chatName + " 님의 회원정보");
+			System.out.println("-------------------------------------");
+			System.out.println("1. 아이디 : " + member.getUid());
+			System.out.println("2. 비밀번호 : " + Security(member, member.getPwd().length()));
+			System.out.println("3. 이름 : " + member.getName());
+			System.out.println("4. 성별 : " + member.getSex());
+			System.out.println("5. 전화번호 : " + member.getPhone());
+			System.out.println("6. 주소 : " + member.getAddress());
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("------------- 실패 사유 : " + e.getMessage());
+		} finally {
+			close();
+		}
+		
+	}
+	
+	public String Security(Member member, int pwd) {
+		String pwdLenth = "";
+		pwd = member.getPwd().length();
+		
+		for(int i = 0;i < pwd;i++) {
+			pwdLenth += "*";
+		}
+		return pwdLenth;
+	}
+	
 	public static void main(String[] args) {
 
 		// updateTest();
 		// findByUidTest();
 	}
+
+	@Override
+	public void insertTest(Scanner scanner, Member member) throws ExistMember {
+		// TODO Auto-generated method stub
+		
+	}
+
+ 
+
+	
 
 }

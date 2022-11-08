@@ -33,6 +33,7 @@ public class ChatClient {
 	//객체 필드
 	static ChatClient chatClient = new ChatClient();
 	Scanner scanner = new Scanner(System.in);
+	Member member = new Member();
 
 	// 로그인 여부
 	public static boolean logon = false;
@@ -119,11 +120,11 @@ public class ChatClient {
 	public void loginSucessMenu() {
 		stop = false;
 		try {
-
+			MemberRepositoryDB memberRepository = new MemberRepositoryDB();
 			while (false == stop && logon == true) {
-				System.out.println("--------------------------------------------------");
+				System.out.println("-------------------------------------");
 				System.out.println("	" + chatName + " 님 환영합니다.");
-				System.out.println("--------------------------------------------------");
+				System.out.println("-------------------------------------");
 				System.out.println();
 				System.out.println("1. 채팅방 입장");
 				System.out.println("2. 나의 회원 정보");
@@ -140,7 +141,7 @@ public class ChatClient {
 					chatClient.chatJoin();
 					break;
 				case "2":
-					
+					memberRepository.detail(scanner, chatClient);
 					break;
 				case "3":
 					chatClient.updateMember(scanner);
