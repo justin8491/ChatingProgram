@@ -20,6 +20,7 @@ import org.json.JSONObject;
 import member.Member;
 import member.Member.ExistMember;
 import member.Member.NotExistUidPwd;
+import server.Logger;
 import member.MemberRepositoryDB;
 import member.MemberRepositoryForDB;
 
@@ -30,7 +31,7 @@ public class ChatServer{
 	ExecutorService threadPool = Executors.newFixedThreadPool(100);
 	Map<String, SocketClient> chatRoom = Collections.synchronizedMap(new HashMap<>());
 	MemberRepositoryDB memberRepository = new MemberRepositoryDB();
-	
+	Logger logger;
 	//메소드: 서버 시작
 	public void start() throws IOException {
 		
@@ -39,7 +40,7 @@ public class ChatServer{
 		
 		serverSocket = new ServerSocket(50001);	
 		System.out.println( "[서버] 시작됨test");
-		
+		logger = new Logger();
 		Thread thread = new Thread(() -> {
 			try {
 				while(true) {
@@ -95,7 +96,7 @@ public class ChatServer{
 			root.put("chatName", sender.chatName);
 			root.put("message", message);
 			String json = root.toString();
-			
+			logger.write(root.toString());
 			chatRoom.values().stream()
 			.filter(socketClient -> socketClient != sender)
 			.forEach(socketClient -> socketClient.send(json));
@@ -109,6 +110,7 @@ public class ChatServer{
 	//메소드: 서버 종료
 	public void stop() {
 		try {
+			logger.endLogger();
 			serverSocket.close();
 			threadPool.shutdownNow();
 			chatRoom.values().stream().forEach(sc -> sc.close());
