@@ -144,7 +144,8 @@ public class ChatClient {
 					memberRepository.detail(scanner, chatClient);
 					break;
 				case "3":
-					chatClient.updateMember(scanner);
+//					chatClient.updateMember(scanner);
+					memberRepository.updateTest();
 					break;
 				case "4":
 					chatClient.fileUpload(scanner);

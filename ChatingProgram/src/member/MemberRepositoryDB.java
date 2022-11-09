@@ -8,14 +8,17 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 import client.ChatClient;
+import member.Member;
 import member.Member.ExistMember;
 import member.Member.NotExistUidPwd;
+import member.MemberRepositoryDB;
 
 public class MemberRepositoryDB implements MemberRepositoryForDB {
 	Connection conn = null;
 	PreparedStatement pstmt = null;
 	ChatClient chatClient = new ChatClient();
 	Scanner scanner = new Scanner(System.in);
+	static Member loginMember = null;
 
 	public void open() {
 		try {
@@ -48,7 +51,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 			System.out.print("비밀번호 : ");
 			String pwd = scanner.next();
 			member = memberrepository.findByUid(uid);
-
+			loginMember=member;
 			String exist = member.getExist();
 			System.out.println();
 			if (!pwd.equals(member.getPwd()) || exist.equals("0")) {
@@ -191,17 +194,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 			pstmt = conn.prepareStatement(Env.getProperty("SELECT_MEMBER"));
 
 			// 멤버 존재여부 확인
-			pstmt.setString(1, member.getUid());
-			ResultSet rs = pstmt.executeQuery();
-			int count = 0;
-			if (rs.next()) {
-				count = rs.getInt(1);
-			}
-			rs.close();
-			if (count != 0) {
-				throw new Member.ExistMember("[" + member.getUid() + "] 아이디가 존재합니다");
-			}
-			pstmt.close();
+			
 			pstmt = conn.prepareStatement(Env.getProperty("UPDATE_MEMBER"));
 
 			// 멤버 정보 설정
@@ -214,6 +207,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 			pstmt.setString(6, member.getUid());
 
 			pstmt.executeUpdate();
+			
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -287,20 +281,44 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 		}
 	}
 
-	private static void updateTest() {
+	public void updateTest() {
+		String uid;
+		String pwd;
+		String name;
+		String sex;
+		String address;
+		String phone;
 		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
-		Member member = new Member();
-		member.setUid("abcd123");
-		member.setPwd("ppasswd");
-		member.setName("이순신");
-		member.setSex("F");
-		member.setAddress("송파구");
-		member.setPhone("010-1111-2222");
+		Member member=loginMember;
+		Scanner sc=new Scanner(System.in);
+		
+		uid = member.getUid();
+		System.out.print("비번 : ");
+		pwd = sc.nextLine();
+		System.out.print("이름 : ");
+		name = sc.nextLine();
+		System.out.print("성별[남자(M)/여자(F)] : ");
+		sex = sc.nextLine();
+		System.out.print("주소 : ");
+		address = sc.nextLine();
+		System.out.print("전화번호 : ");
+		phone = sc.nextLine();
+		
 		try {
+			member = memberRepository.findByUid(uid);
+			member.setPwd(pwd);
+			member.setName(name);
+			member.setSex(sex);
+			member.setAddress(address);
+			member.setPhone(phone);
 			memberRepository.updateMember(member);
-		} catch (NotExistUidPwd e) {
-			e.printStackTrace();
+		} catch (NotExistUidPwd e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
+		
+	
+		
 	}
 
 	public void deleteTest(Scanner scanner) {
@@ -457,7 +475,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 		try {
 			open();
 			MemberRepositoryDB memberRepository = new MemberRepositoryDB();
-			Member member = memberRepository.findByName(chatClient.chatName);
+			Member member = loginMember;
 			pstmt = conn.prepareStatement(Env.getProperty("DETAIL_MEMBER"));
 			System.out.println("-------------------------------------");
 			System.out.println("	" + chatClient.chatName + " 님의 회원정보");
