@@ -12,6 +12,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Base64;
+import java.util.Scanner;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -28,7 +29,7 @@ public class SocketClient {
 	DataOutputStream dos;
 	String clientIp;
 	String chatName;
-
+	Scanner sc = new Scanner(System.in);
 	// 생성자
 	public SocketClient(ChatServer chatServer, Socket socket) {
 		try {
@@ -179,15 +180,15 @@ public class SocketClient {
 	}
 
 	private void updateMember(JSONObject jsonObject) {
-		Member member = new Member(jsonObject);
-
+		Scanner scanner = new Scanner(System.in);
+		
 		JSONObject jsonResult = new JSONObject();
 
 		jsonResult.put("statusCode", "-1");
 		jsonResult.put("message", "로그인 아이디가 존재하지 않습니다");
 
 		try {
-			chatServer.memberRepository.updateMember(member);
+			chatServer.memberRepository.updateMember(scanner);
 			jsonResult.put("statusCode", "0");
 			jsonResult.put("message", "회원정보수정이 정상으로 처리되었습니다");
 		} catch (Member.NotExistUidPwd e) {

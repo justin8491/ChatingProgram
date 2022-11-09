@@ -20,6 +20,6 @@ public interface MemberRepositoryForDB {
 	void login(Scanner scanner) throws Member.NotExistUidPwd;
 	void insertTest(Scanner scanner, Member member) throws Member.ExistMember;
 	Member findByUid(String uid) throws Member.NotExistUidPwd;
-	void updateMember(Member member) throws Member.NotExistUidPwd;
+	void updateMember(Scanner scanner) throws Member.NotExistUidPwd;
 	void detail(Scanner scanner, ChatClient chatClient) throws Member.NotExistUidPwd;
 }

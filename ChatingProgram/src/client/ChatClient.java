@@ -145,7 +145,7 @@ public class ChatClient {
 					memberRepository.detail(scanner, chatClient);
 					break;
 				case "3":
-					chatClient.updateMember(scanner);
+					memberRepository.updateMember(scanner);
 					break;
 				case "4":
 					chatClient.fileUpload(scanner);
@@ -217,47 +217,47 @@ public class ChatClient {
 		}
 	}
 	
-	private void updateMember(Scanner scanner) {
-		String uid;
-		String pwd;
-		String address;
-		String phone;
-		String sex;
-		String name;
-
-		try {
-			System.out.println("\n4. 회원정보수정");
-			System.out.print("아이디 : ");
-			uid = scanner.nextLine();
-			System.out.print("비번 : ");
-			pwd = scanner.nextLine();
-			System.out.print("주소 : ");
-			address = scanner.nextLine();
-			System.out.print("성별 : ");
-			sex = scanner.nextLine();
-			System.out.print("이름 : ");
-			name = scanner.nextLine();
-			System.out.print("전화번호 : ");
-			phone = scanner.nextLine();
-
-			connect();
-
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("command", "updateMember");
-			jsonObject.put("uid", uid);
-			jsonObject.put("pwd", pwd);
-			jsonObject.put("address", address);
-			jsonObject.put("phone", phone);
-			send(jsonObject);
-
-			updateMemberResponse();
-
-			disconnect();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+//	private void updateMember(Scanner scanner) {
+//		String uid;
+//		String pwd;
+//		String address;
+//		String phone;
+//		String sex;
+//		String name;
+//
+//		try {
+//			System.out.println("\n4. 회원정보수정");
+//			System.out.print("아이디 : ");
+//			uid = scanner.nextLine();
+//			System.out.print("비번 : ");
+//			pwd = scanner.nextLine();
+//			System.out.print("주소 : ");
+//			address = scanner.nextLine();
+//			System.out.print("성별 : ");
+//			sex = scanner.nextLine();
+//			System.out.print("이름 : ");
+//			name = scanner.nextLine();
+//			System.out.print("전화번호 : ");
+//			phone = scanner.nextLine();
+//
+//			connect();
+//
+//			JSONObject jsonObject = new JSONObject();
+//			jsonObject.put("command", "updateMember");
+//			jsonObject.put("uid", uid);
+//			jsonObject.put("pwd", pwd);
+//			jsonObject.put("address", address);
+//			jsonObject.put("phone", phone);
+//			send(jsonObject);
+//
+//			updateMemberResponse();
+//
+//			disconnect();
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
 
 	public void updateMemberResponse() throws Exception {
 		String json = dis.readUTF();
@@ -416,6 +416,8 @@ public class ChatClient {
 	public static void main(String[] args) {
 		try {
 			ChatClient chatClient = new ChatClient();
+			
+			
 			MemberRepositoryDB memberRepository=new MemberRepositoryDB();
 			while (false == stop) {
 				System.out.println();

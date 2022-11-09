@@ -186,10 +186,13 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 	}
 
 //
-	public synchronized void updateMember(Member member) throws Member.NotExistUidPwd {
+	public synchronized void updateMember(Scanner scanner) throws Member.NotExistUidPwd {
+		
 		try {
 			open();
 
+			Member member = new Member();
+			
 			pstmt = conn.prepareStatement(Env.getProperty("SELECT_MEMBER"));
 
 			// 멤버 존재여부 확인
@@ -290,21 +293,27 @@ public class MemberRepositoryDB implements MemberRepositoryForDB{
 	}
 	
 	
-	private static void updateTest() {
-		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
-		Member member = new Member();
-		member.setUid("abcd123");
-		member.setPwd("ppasswd");
-		member.setName("이순신");
-		member.setSex("F");
-		member.setAddress("송파구");
-		member.setPhone("010-1111-2222");
-		try {
-			memberRepository.updateMember(member);
-		} catch (NotExistUidPwd e) {
-			e.printStackTrace();
-		}
-	}
+//	private static void updateTest() {
+//		
+//		
+//		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
+//		Member member = new Member();
+//		member.setUid("abcd123");
+//		member.setPwd("ppasswd");
+//		member.setName("이순신");
+//		member.setSex("F");
+//		member.setAddress("송파구");
+//		member.setPhone("010-1111-2222");
+//		try {
+//			memberRepository.updateMember(scanner);
+//		} catch (NotExistUidPwd e) {
+//			e.printStackTrace();
+//		}
+//	}
+	
+	
+	
+	
 	public void deleteTest(Scanner scanner) {
 		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
 		
