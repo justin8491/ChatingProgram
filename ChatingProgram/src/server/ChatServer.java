@@ -10,6 +10,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
@@ -28,8 +29,15 @@ public class ChatServer{
 	static //필드
 	ServerSocket serverSocket;
 	ExecutorService threadPool = Executors.newFixedThreadPool(100);
+	Map<String, Map<String, SocketClient>> chatRooms;
 	Map<String, SocketClient> chatRoom = Collections.synchronizedMap(new HashMap<>());
 	MemberRepositoryDB memberRepository = new MemberRepositoryDB();
+	
+	
+	//채팅방 리스트
+	public List<String> getChatRoomList() {
+		return chatRooms.keySet().stream().toList();
+	}
 	
 	//메소드: 서버 시작
 	public void start() throws IOException {
@@ -137,6 +145,21 @@ public class ChatServer{
 	public void updateMember(Member member) throws NotExistUidPwd {
 		memberRepository.updateMember(member);
 		
+	}
+	
+	public void addChatRoom(SocketClient socketClient) throws ExistChatRootException {
+		if (chatRooms.containsKey(socketClient.getRoomName())) {
+			throw new ExistChatRootException();
+		}
+		chatRooms.put(socketClient.getRoomName(), new HashMap<>());
+		// 폴더 생성
+		String path = Env.getWorkPath() + File.separatorChar + String.valueOf(socketClient.getRoomName().hashCode());
+		File chatRoomFileFolder = new File(path);
+		System.out.println(chatRoomFileFolder.getAbsolutePath());
+		if (!chatRoomFileFolder.exists()) {
+			chatRoomFileFolder.mkdirs();
+		}
+
 	}
 	
 	

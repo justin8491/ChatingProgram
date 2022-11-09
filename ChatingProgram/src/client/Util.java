@@ -1,4 +1,4 @@
-package member;
+package client;
 
 public class Util {
     

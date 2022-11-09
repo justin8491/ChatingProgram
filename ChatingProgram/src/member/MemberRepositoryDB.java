@@ -10,6 +10,7 @@ import java.util.Scanner;
 import client.ChatClient;
 import member.Member.ExistMember;
 import member.Member.NotExistUidPwd;
+import server.Env;
 
 public class MemberRepositoryDB implements MemberRepositoryForDB {
 	Connection conn = null;
@@ -39,6 +40,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 	 */
 	public synchronized void login(Scanner scanner) {
 		try {
+			System.out.println("로그인 진입");
 			MemberRepositoryDB memberrepository = new MemberRepositoryDB();
 			Member member = new Member();
 			open();
@@ -57,7 +59,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 				System.out.println("로그인 성공");
 				chatClient.chatName = member.getName();
 				chatClient.connect();
-				chatClient.logon = true;
+				chatClient.logon = member;
 			}
 
 		} catch (Exception e) {
