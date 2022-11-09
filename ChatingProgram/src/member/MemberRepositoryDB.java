@@ -19,6 +19,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 	ChatClient chatClient = new ChatClient();
 	Scanner scanner = new Scanner(System.in);
 	static Member loginMember = null;
+	
 
 	public void open() {
 		try {
@@ -58,7 +59,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 				System.out.println("로그인 실패");
 			} else {
 				System.out.println("로그인 성공");
-				chatClient.chatName = member.getName();
+				ChatClient.chatName = member.getName();
 				chatClient.connect();
 				chatClient.logon = true;
 			}
@@ -207,8 +208,8 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 			pstmt.setString(6, member.getUid());
 
 			pstmt.executeUpdate();
-			
-
+			loginMember=member;
+			ChatClient.chatName = member.getName();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
