@@ -420,7 +420,6 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 				System.out.println(" 관리자페이지 입니다.");
 				System.out.println("--------------------------------------------------");
 				System.out.println("1. 회원목록 조회");
-				System.out.println();
 				System.out.println("2. 회원 검색");
 				System.out.println("3. 관리자페이지 종료");
 				System.out.print("메뉴 선택 => ");
@@ -478,7 +477,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 			Member member = loginMember;
 			pstmt = conn.prepareStatement(Env.getProperty("DETAIL_MEMBER"));
 			System.out.println("-------------------------------------");
-			System.out.println("	" + chatClient.chatName + " 님의 회원정보");
+			System.out.println("	" + member.getName() + " 님의 회원정보");
 			System.out.println("-------------------------------------");
 			System.out.println("1. 아이디 : " + member.getUid());
 			System.out.println("2. 비밀번호 : " + Security(member, member.getPwd().length()));
