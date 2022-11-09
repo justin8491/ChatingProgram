@@ -8,9 +8,9 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 import client.ChatClient;
+import client.Env;
 import member.Member.ExistMember;
 import member.Member.NotExistUidPwd;
-import server.Env;
 
 public class MemberRepositoryDB implements MemberRepositoryForDB {
 	Connection conn = null;
@@ -87,9 +87,9 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 
 		try {
 			open();
-
+			
 			pstmt = conn.prepareStatement(Env.getProperty("SELECT_MEMBER"));
-
+			
 			// 멤버 존재여부 확인
 			pstmt.setString(1, member.getUid());
 			ResultSet rs = pstmt.executeQuery();
@@ -455,7 +455,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 	}
 
 	@Override
-	public void detail(Scanner scanner, ChatClient chatClient) throws NotExistUidPwd {
+	public void detail() {
 		try {
 			open();
 			MemberRepositoryDB memberRepository = new MemberRepositoryDB();

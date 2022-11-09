@@ -36,8 +36,8 @@ public class Member implements Serializable{
 		this.address = address;
 		this.exist=exist;
 	}
+	
 	// Member 생성자를 this를 사용하여 초기화 해주었습니다.
-
 	public Member(JSONObject jsonObject) {
 		uid = jsonObject.getString("uid");
 		pwd = jsonObject.getString("pwd");

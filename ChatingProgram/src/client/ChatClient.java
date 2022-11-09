@@ -16,9 +16,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.management.openmbean.OpenDataException;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import chatroom.ChatRoomRepositoryDB;
 import member.Member;
 import member.Member.ExistMember;
 import member.Member.NotExistUidPwd;
@@ -39,7 +42,7 @@ public class ChatClient {
 	Scanner scanner = new Scanner(System.in);
 	Member member = new Member();
 	
-	// 로그인 여부
+	// 로그인 멤버 객체 값
 	public static Member logon = null;
 	
 	//채팅방 정보 JSON 구조 ({no : 채팅방번호, roomName : "채팅방이름"})
@@ -132,6 +135,7 @@ public class ChatClient {
 		stop = false;
 		try {
 			MemberRepositoryDB memberRepository = new MemberRepositoryDB();
+			ChatRoomRepositoryDB chatRoomRepository = new ChatRoomRepositoryDB();
 			while (false == stop && logon != null) {
 				System.out.println("-------------------------------------");
 				System.out.println("	" + chatName + " 님 환영합니다.");
@@ -145,22 +149,23 @@ public class ChatClient {
 				System.out.println("6. 파일 업로드");
 				System.out.println("7. 파일 목록 조회");
 				System.out.println("8. 파일 다운로드");
-				System.out.println("q. 프로그램 종료");
+				System.out.println("q. 로그아웃");
 				System.out.print("메뉴 선택 => ");
 				Scanner scanner = new Scanner(System.in);
 				String menuNum = scanner.nextLine();
 				switch (menuNum) {
 				case "1":
-					createChatRoom(scanner);
+					//createChatRoom(scanner);
+					chatRoomRepository.createChatRoom(scanner);
 					break;
 				case "2":
-					chatRoomListRequest(scanner);
+					chatRoomRepository.chatRoomListRequest();
 					break;
 				case "3":
 					enterRoomResponse();
 					break;
 				case "4":
-					memberRepository.detail(scanner, chatClient);
+					memberRepository.detail();
 					break;
 				case "5":
 					chatClient.updateMember(scanner);
@@ -175,9 +180,8 @@ public class ChatClient {
 					chatClient.fileDownload(scanner);
 					break;
 				case "Q", "q":
-					scanner.close();
-					stop = true;
-					System.out.println("프로그램 종료됨");
+					System.out.println(chatName +"님 로그아웃 하셨습니다.");
+					logon = null;
 					break;
 				}
 			}
@@ -438,19 +442,27 @@ public class ChatClient {
 	 * 2. 목록
 	 * 3. 입장
 	 * @param createChatRoom
+	 * 
 	 */
+	//1. 채팅방 생성
 	private void createChatRoom(Scanner scanner) {
         try {
+            MemberRepositoryDB memberRepository = new MemberRepositoryDB();
+            ChatRoomRepositoryDB chatRoomRepository = new ChatRoomRepositoryDB();
+            memberRepository.open();
+            
+            
             
             System.out.println("\n1. 채팅방 생성");
             System.out.print("채팅방 : ");
             roomName = scanner.nextLine();
+            member = memberRepository.findByUid(logon.getUid());
 
             connect();
             
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("command", "createChatRoom");
-            jsonObject.put("uid", logon.getUid());
+            jsonObject.put("uid", member.getUid());
             jsonObject.put("roomName", roomName);
 
             send(jsonObject.toString());
@@ -491,9 +503,12 @@ public class ChatClient {
         return new String(data, "UTF8");
     }
 	
+	//2. 목록
 	//챗 룸 리스트 요청
     public void chatRoomListRequest(Scanner scanner) {
         try {
+        	
+        	
             connect();
             
             JSONObject jsonObject = new JSONObject();
@@ -528,10 +543,30 @@ public class ChatClient {
         
         disconnect();
     }
-	
+    
+    private void displayChattingRoomList() {
+        int idx = 1;
+        System.out.println("----------------");
+        System.out.println("* 채팅방 목록 *");
+        for (String chatRoom : chatRooms) {
+            System.out.println(idx + ". " + chatRoom);
+            idx++;
+        }
+        if (0 == chatRooms.size()) {
+            System.out.println("* 입장 가능한 채팅방이 없습니다. 채팅방 생성을 먼저 생성하세요 *");
+        }        
+    }
+    
+    
+	//3. 입장
 	//입장 할 채팅방 요청
     private void enterRoomRequest(Scanner scanner) {
         try {
+        	
+        	displayChattingRoomList();
+            if (chatRooms.size() == 0) {
+                return;
+            }
         	
             System.out.print("입장할 채팅방 번호 : ");
             int roomNum = Util.parseInt(scanner.nextLine(), 0);

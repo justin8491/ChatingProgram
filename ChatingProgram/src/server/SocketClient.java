@@ -17,9 +17,11 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import chatroom.ChatRoomRepositoryDB;
 import lombok.Builder;
 import lombok.Data;
 import member.Member;
+import member.MemberRepositoryDB;
 
 @Data
 public class SocketClient {
@@ -31,7 +33,7 @@ public class SocketClient {
 	String clientIp;
 	String chatName;
 	String uid;
-    private String roomName;
+	private String roomName;
 
 	// 생성자
 	public SocketClient(ChatServer chatServer, Socket socket) {
@@ -46,25 +48,25 @@ public class SocketClient {
 		} catch (IOException e) {
 		}
 	}
-	
-	//클라이언트 키값
+
+	// 클라이언트 키값
 	public String getKey() {
-	    return uid + "@" + clientIp;	    
+		return uid + "@" + clientIp;
 	}
-	
-	//클라이언트 데이터 읽기
+
+	// 클라이언트 데이터 읽기
 	private String clientDataRead() throws IOException {
-        int length = dis.readInt();
-        int pos = 0; 
-        byte [] data = new byte[length];
-        do {
-            int len = dis.read(data, pos, length - pos);
-            pos += len;
-        } while(length != pos);
-        
-        return new String(data, "UTF8");
+		int length = dis.readInt();
+		int pos = 0;
+		byte[] data = new byte[length];
+		do {
+			int len = dis.read(data, pos, length - pos);
+			pos += len;
+		} while (length != pos);
+
+		return new String(data, "UTF8");
 	}
-	
+
 	// 메소드: JSON 받기
 	public void receive() {
 		chatServer.threadPool.execute(() -> {
@@ -122,20 +124,19 @@ public class SocketClient {
 						fileDownload(jsonObject);
 						stop = true;
 						break;
-						
+
 					case "createChatRoom":
-                        this.roomName = jsonObject.getString("roomName");
-                        createChatRoom(jsonObject);
-                        stop = true;
-                        break;
-                        
-                    case "chatRoomListRequest":
-                        chatRoomListRequest(jsonObject);
-                        stop = true;
-                        break;
+						this.roomName = jsonObject.getString("roomName");
+						createChatRoom(jsonObject);
+						stop = true;
+						break;
+
+					case "chatRoomListRequest":
+						chatRoomListRequest(jsonObject);
+						stop = true;
+						break;
 					}
-					
-					
+
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -166,7 +167,7 @@ public class SocketClient {
 	}
 
 	private void login(JSONObject jsonObject) {
-		
+
 		Member member = new Member();
 //		String uid = jsonObject.getString("uid");
 //		String pwd = jsonObject.getString("pwd");
@@ -324,60 +325,59 @@ public class SocketClient {
 		close();
 
 	}
-	
+
 	/**
-	 * Chat Room
-	 * 1. 생성
-	 * 2. 목록
-	 * 3. 입장
+	 * Chat Room 1. 생성 2. 목록 3. 입장
+	 * 
 	 * @param jsonObject
 	 */
 	private void createChatRoom(JSONObject jsonObject) {
-        JSONObject jsonResult = new JSONObject();
-        
-        try {
-            chatServer.addChatRoom(this);
-            jsonResult.put("statusCode", "0");
-            jsonResult.put("message", "[" + roomName + "] 채팅방이 생성되었습니다");
-        } catch (ExistChatRootException e) {
-            e.printStackTrace();
-            jsonResult.put("statusCode", "-1");
-            jsonResult.put("message", "[" + roomName + "] 채팅방은 이미 존재합니다");
-        }
+		JSONObject jsonResult = new JSONObject();
+		try {
+			ChatRoomRepositoryDB chatRoomRepository = new ChatRoomRepositoryDB();
+			
+			
+			chatServer.addChatRoom(this);
+			jsonResult.put("statusCode", "0");
+			jsonResult.put("message", "[" + roomName + "] 채팅방이 생성되었습니다");
+		} catch (ExistChatRootException e) {
+			e.printStackTrace();
+			jsonResult.put("statusCode", "-1");
+			jsonResult.put("message", "[" + roomName + "] 채팅방은 이미 존재합니다");
+		}
 
-        send(jsonResult.toString());
-        
-        System.out.println(jsonResult);
-    }
-	
+		send(jsonResult.toString());
+
+		System.out.println(jsonResult);
+	}
+
 	private void enterRoomRequest(JSONObject jsonObject) {
-        List<String> chatRoomList = chatServer.getChatRoomList(); 
+		List<String> chatRoomList = chatServer.getChatRoomList();
 
-        JSONObject jsonResult = new JSONObject();
-        
-        jsonResult.put("statusCode", "0");
-        jsonResult.put("message", "채팅방 목록 조회");
-        jsonResult.put("chatRooms", chatRoomList);
+		JSONObject jsonResult = new JSONObject();
 
-        send(jsonResult.toString());
-        
-    }
-	
-    private void chatRoomListRequest(JSONObject jsonObject) {
-	    List<String> chatRoomList = chatServer.getChatRoomList(); 
+//        jsonResult.put("statusCode", "0");
+//        jsonResult.put("message", "채팅방 목록 조회");
+		jsonResult.put("chatRooms", chatRoomList);
 
-        JSONObject jsonResult = new JSONObject();
-        
-        jsonResult.put("statusCode", "0");
-        jsonResult.put("message", "채팅방 목록 조회");
-        jsonResult.put("chatRooms", chatRoomList);
+		send(jsonResult.toString());
 
-        send(jsonResult.toString());
-        
-        close();        
-    }
-	
-	
+	}
+
+	private void chatRoomListRequest(JSONObject jsonObject) {
+		List<String> chatRoomList = chatServer.getChatRoomList();
+
+		JSONObject jsonResult = new JSONObject();
+
+		jsonResult.put("statusCode", "0");
+		jsonResult.put("message", "채팅방 목록 조회");
+		jsonResult.put("chatRooms", chatRoomList);
+
+		send(jsonResult.toString());
+
+		close();
+	}
+
 	// 메소드: JSON 보내기
 	public void send(String json) {
 		try {
