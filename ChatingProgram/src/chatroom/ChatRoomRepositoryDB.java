@@ -92,7 +92,7 @@ public class ChatRoomRepositoryDB implements ChatRoomRepositoryforDB {
 				System.out.print("채팅방 번호 : " + rs.getString(1) + " ");
 				System.out.print("만든 시간 : " + rs.getDate(2) + " ");
 				System.out.print("채팅방 이름: " + rs.getString(3) + " ");
-				if (rs.getString(4) == "1") {
+				if (rs.getString(4) != "1") {
 					System.out.print("존재 여부: O ");
 				} else {
 					System.out.print("존재 여부: X ");
