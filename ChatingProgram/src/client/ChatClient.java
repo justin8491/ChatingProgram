@@ -182,6 +182,7 @@ public class ChatClient {
 				case "Q", "q":
 					System.out.println(chatName +"님 로그아웃 하셨습니다.");
 					logon = null;
+					mainMenu();
 					break;
 				}
 			}
@@ -191,7 +192,6 @@ public class ChatClient {
 			System.out.println("[클라이언트] 서버 연결 안됨");
 		}
 	}
-	
 	
 	
 	
@@ -623,9 +623,7 @@ public class ChatClient {
     private String getRoomName(int roomNum) {
     	return chatRooms.get(roomNum-1);
     }
-	
-	// 메소드: 메인
-	public static void main(String[] args) {
+	public static void mainMenu() {
 		try {
 			ChatClient chatClient = new ChatClient();
 			MemberRepositoryDB memberRepository=new MemberRepositoryDB();
@@ -677,6 +675,10 @@ public class ChatClient {
 			e.printStackTrace();
 			System.out.println("[클라이언트] 서버 연결 안됨");
 		}
+	}
+	// 메소드: 메인
+	public static void main(String[] args) {
+		mainMenu();
 	}
 
 
