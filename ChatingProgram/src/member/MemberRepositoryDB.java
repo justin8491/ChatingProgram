@@ -461,6 +461,13 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 				System.out.print("전화번호: " + rs.getString(4) + " ");
 				System.out.print("성별: " + rs.getString(5) + " ");
 				System.out.print("주소: " + rs.getString(6) + " ");
+				String Exist=rs.getString(8);
+				if(Exist.equals("0")) {
+					System.out.print("탈퇴회원");
+				}
+				else {
+					System.out.print("가입회원");
+				}
 				System.out.println();
 			}
 		} catch (Exception e) {
