@@ -154,7 +154,35 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 		}
 		return null;
 	}
+	public void searchLog(Scanner scanner) {
+		System.out.println("검색하고 싶은 유저이름을 입력하세요:");
+		String name = scanner.next();
+		findChatLog(name);
+		
+	}
+	public void findChatLog(String name) {
+		try {
+			open();
 
+			pstmt = conn.prepareStatement(Env.getProperty("FIND_LOG"));
+			pstmt.setString(1, name);
+			
+			
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				
+				System.out.println(rs.getString(1));
+				
+			}
+			rs.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			close();
+		}
+	}
+		
+	
 	public Member findByName(String name) throws Member.NotExistUidPwd {
 		try {
 			open();

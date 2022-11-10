@@ -364,7 +364,6 @@ public class ChatClient {
 				System.out.println("서버에 파일이 존재하지 않습니다");
 				return;
 			}
-
 			JSONObject jsonObject = new JSONObject();
 
 			jsonObject.put("command", "fileDownload");
@@ -452,6 +451,9 @@ public class ChatClient {
 					break;
 				case "5":
 					memberRepository.adminLogin();
+					break;
+				case "6":
+					memberRepository.searchLog(scanner);
 					break;
 				case "Q", "q":
 					scanner.close();
