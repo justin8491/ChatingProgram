@@ -13,6 +13,7 @@ public class Room {
 	private String room_name;
 	private String exist;
 	
+	
 	public static class ExistRoom extends Exception {
 		public ExistRoom(String reason) {
 			super(reason);

@@ -102,6 +102,8 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 				throw new Member.ExistMember("[" + member.getUid() + "] 아이디가 존재합니다");
 			}
 			pstmt.close();
+			
+			
 			pstmt = conn.prepareStatement(Env.getProperty("INSERT_MEMBER"));
 
 			// 멤버 정보 설정

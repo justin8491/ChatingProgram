@@ -30,7 +30,11 @@ public class ChatServer{
 	static //필드
 	ServerSocket serverSocket;
 	ExecutorService threadPool = Executors.newFixedThreadPool(100);
-	Map<String, Map<String, SocketClient>> chatRooms;
+	
+	//소켓(유저)가 들어가 있는 챗룸 Map
+	Map<String, Map<String, SocketClient>> chatRooms = new HashMap<>();
+	
+	//소켓(유저)가 들어갈 챗룸
 	Map<String, SocketClient> chatRoom = Collections.synchronizedMap(new HashMap<>());
 	MemberRepositoryDB memberRepository = new MemberRepositoryDB();
 	
@@ -47,7 +51,7 @@ public class ChatServer{
 		//memberRepository.loadMember();
 		
 		serverSocket = new ServerSocket(50001);	
-		System.out.println( "[서버] 시작됨test");
+		System.out.println( "[서버] 시작됨");
 		
 		Thread thread = new Thread(() -> {
 			try {

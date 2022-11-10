@@ -85,10 +85,10 @@ public class SocketClient {
 					 * 
 					 */
 					switch (command) {
-					case "login":
-						login(jsonObject);
-						stop = true;
-						break;
+//					case "login":
+//						login(jsonObject);
+//						stop = true;
+//						break;
 					case "passwdSearch":
 						passwdSearch(jsonObject);
 						stop = true;
@@ -112,25 +112,11 @@ public class SocketClient {
 						String message = jsonObject.getString("data");
 						chatServer.sendToAll(this, message);
 						break;
-					case "fileUpload":
-						fileUpload(jsonObject);
-						stop = true;
-						break;
-					case "fileListRequest":
-						fileListRequest(jsonObject);
-						stop = true;
-						break;
-					case "fileDownload":
-						fileDownload(jsonObject);
-						stop = true;
-						break;
-
 					case "createChatRoom":
 						this.roomName = jsonObject.getString("roomName");
 						createChatRoom(jsonObject);
 						stop = true;
 						break;
-
 					case "chatRoomListRequest":
 						chatRoomListRequest(jsonObject);
 						stop = true;
@@ -166,30 +152,6 @@ public class SocketClient {
 		close();
 	}
 
-	private void login(JSONObject jsonObject) {
-
-		Member member = new Member();
-//		String uid = jsonObject.getString("uid");
-//		String pwd = jsonObject.getString("pwd");
-//		JSONObject jsonResult = new JSONObject();
-//
-//		jsonResult.put("statusCode", "-1");
-//		jsonResult.put("message", "로그인 아이디가 존재하지 않습니다");
-//
-//		try {
-//			Member member = chatServer.findByUid(uid);
-//			if (null != member && pwd.equals(member.getPwd())) {
-//				jsonResult.put("statusCode", "0");
-//				jsonResult.put("message", "로그인 성공");
-//			}
-//		} catch (Member.NotExistUidPwd e) {
-//			e.printStackTrace();
-//		}
-
-//		send(jsonResult.toString());
-
-		close();
-	}
 
 	private void passwdSearch(JSONObject jsonObject) {
 		String uid = jsonObject.getString("uid");
@@ -236,96 +198,7 @@ public class SocketClient {
 
 	}
 
-	private void fileDownload(JSONObject jsonObject) {
-		try {
-			String fileName = jsonObject.getString("fileName");
-			JSONObject jsonResult = new JSONObject();
-
-			File file = new File("C:\\down\\" + fileName);
-			if (!file.exists()) {
-				System.out.println("파일이 존재 하지 않습니다");
-				jsonResult.put("statusCode", "-1");
-				jsonResult.put("message", "알수 없는 오류 ");
-			} else {
-				BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
-				byte[] data = new byte[(int) file.length()];
-				in.read(data);
-				in.close();
-
-				jsonResult.put("statusCode", "0");
-				jsonResult.put("fileName", file.getName());
-				jsonResult.put("message", "성공");
-				if (fileName.contains("jpg") || fileName.contains("png") || fileName.contains("jpeg")) {
-					Runtime.getRuntime().exec("mspaint c:\\down\\" + fileName);
-				} else if (fileName.contains("txt")) {
-					Runtime.getRuntime().exec("notepad c:\\down\\" + fileName);
-				}
-
-				jsonResult.put("content", new String(Base64.getEncoder().encode(data)));
-
-				send(jsonResult.toString());
-
-				close();
-			}
-		} catch (UnknownHostException ue) {
-			System.out.println(ue.getMessage());
-		} catch (IOException ie) {
-			System.out.println(ie.getMessage());
-		}
-	}
-
-	private void fileListRequest(JSONObject jsonObject) {
-		JSONObject jsonResult = new JSONObject();
-
-		JSONArray jsonArray = new JSONArray();
-
-		File downPath = new File("c:\\down");
-		for (File file : downPath.listFiles()) {
-			if (!file.isFile())
-				continue;
-			JSONObject jsonItem = new JSONObject();
-			jsonItem.put("fileName", file.getName());
-			jsonItem.put("size", file.length());
-			jsonArray.put(jsonItem);
-		}
-
-		jsonResult.put("statusCode", "0");
-		jsonResult.put("fileList", jsonArray);
-		jsonResult.put("message", "성공");
-
-		send(jsonResult.toString());
-
-		close();
-	}
-
-	private void fileUpload(JSONObject jsonObject) {
-		String fileName = jsonObject.getString("fileName");
-		byte[] data = Base64.getDecoder().decode(jsonObject.getString("content").getBytes());
-		JSONObject jsonResult = new JSONObject();
-
-		String path = "c:\\down";
-		File Folder = new File(path);
-
-		if (!Folder.exists()) {
-			Folder.mkdir();
-		}
-
-		try {
-
-			BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream("c:\\down\\" + fileName));
-			fos.write(data);
-			fos.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("파일수신 완료");
-		}
-		jsonResult.put("message", "파일수신 완료");
-		jsonResult.put("statusCode", "0");
-		send(jsonResult.toString());
-		close();
-
-	}
-
+	
 	/**
 	 * Chat Room 1. 생성 2. 목록 3. 입장
 	 * 
@@ -334,9 +207,7 @@ public class SocketClient {
 	private void createChatRoom(JSONObject jsonObject) {
 		JSONObject jsonResult = new JSONObject();
 		try {
-			ChatRoomRepositoryDB chatRoomRepository = new ChatRoomRepositoryDB();
-			
-			
+			System.out.println("this 진입 전");
 			chatServer.addChatRoom(this);
 			jsonResult.put("statusCode", "0");
 			jsonResult.put("message", "[" + roomName + "] 채팅방이 생성되었습니다");
@@ -356,8 +227,8 @@ public class SocketClient {
 
 		JSONObject jsonResult = new JSONObject();
 
-//        jsonResult.put("statusCode", "0");
-//        jsonResult.put("message", "채팅방 목록 조회");
+        jsonResult.put("statusCode", "0");
+        jsonResult.put("message", "채팅방 목록 조회");
 		jsonResult.put("chatRooms", chatRoomList);
 
 		send(jsonResult.toString());
@@ -372,7 +243,7 @@ public class SocketClient {
 		jsonResult.put("statusCode", "0");
 		jsonResult.put("message", "채팅방 목록 조회");
 		jsonResult.put("chatRooms", chatRoomList);
-
+		System.out.println("채팅방 리스트 조회 성공");
 		send(jsonResult.toString());
 
 		close();

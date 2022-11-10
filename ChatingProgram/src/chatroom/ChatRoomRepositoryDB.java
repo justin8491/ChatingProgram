@@ -13,6 +13,9 @@ import chatroom.Room.NotExistRoom;
 import client.ChatClient;
 import client.Env;
 import member.Member;
+import member.MemberRepositoryDB;
+import server.ChatServer;
+import server.SocketClient;
 
 public class ChatRoomRepositoryDB implements ChatRoomRepositoryforDB {
 
@@ -56,15 +59,18 @@ public class ChatRoomRepositoryDB implements ChatRoomRepositoryforDB {
 	public synchronized void createChatRoom(Scanner scanner) {
 		try {
 			open();
-
+			
 			pstmt = conn.prepareStatement(Env.getProperty("INSERT_ROOM"));
 
 			System.out.println("\n1. 채팅방 생성");
 			System.out.print("채팅방 : ");
 			String roomName = scanner.nextLine();
 			pstmt.setString(1, roomName);
+			
 			pstmt.executeUpdate();
+			
 
+		
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("------------- 실패 사유 : " + e.getMessage());
@@ -73,13 +79,19 @@ public class ChatRoomRepositoryDB implements ChatRoomRepositoryforDB {
 		}
 
 	}
+	
+	@Override
+	public void createChatRoomResponse() {
+		// TODO Auto-generated method stub
+		
+	}
 
 	// 목록
 	@Override
 	public void chatRoomListRequest() {
 		try {
 			open();
-
+			
 			pstmt = conn.prepareStatement(Env.getProperty("ROOM_LIST"));
 
 			// 멤버 존재여부 확인
@@ -113,20 +125,76 @@ public class ChatRoomRepositoryDB implements ChatRoomRepositoryforDB {
 	}
 
 	// 입장
+	/**
+	 * 1. ROOM_NAME 값을 찾아서 MEMBER 값을 ROOM_MEMBER 에 값 insert
+	 * 2. 해당 Member(SocketClient) -> chatRoom 에 대입
+	 * 3. 클라이언트 connect
+	 * 4. 클라이언트 receive
+	 */
 	@Override
-	public void enterRoomRequest(Scanner scanner) {
+	public void enterRoomRequest(String roomName, SocketClient socketClient) {
 		try {
 			open();
+			ChatRoomRepositoryDB chatRoomRepository = new ChatRoomRepositoryDB();
+			
+			
+			//roomName = chatRoomRepository.findByName(this);
+
+			
+			MemberRepositoryDB memberRepository = new MemberRepositoryDB();
+			
+			Member member = new Member();
+			
+			
+			member = memberRepository.findByName(socketClient.getChatName());
+			
+			
+			
 		} catch (Exception e) {
 
 		} finally {
 			close();
 		}
 	}
+	
+	//생성된 채팅방 Name Search 값
+	@Override
+	public Room findByName(String name) {
+		try {
+			open();
+
+			pstmt = conn.prepareStatement(Env.getProperty("findByName_Room"));
+			// 멤버 존재여부 확인
+			pstmt.setString(1, name);
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next()) {
+				
+				room.setRoom_id(rs.getString("USERID"));
+				room.setCreatedate(rs.getDate("CREATEDATE"));
+				room.setRoom_name(rs.getString("NAME"));
+				room.setExist(rs.getString("EXIST"));
+				
+				rs.close();
+				return room;
+			} else {
+				throw new Member.NotExistUidPwd("[" + name + "] 님의 정보가 존재하지 않습니다");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("------------- 실패 사유 : " + e.getMessage());
+		} finally {
+			close();
+		}
+		return null;
+	}
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
 	}
+
+	
+
+	
 
 }
