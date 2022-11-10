@@ -166,23 +166,7 @@ public class ChatServer{
 	
 	
 	
-	public void files() {
-		try {
-	String DATA_DIRECTORY = "c:/down/";
-	
-	File dir = new File(DATA_DIRECTORY);
 
-	String[] filenames = dir.list();
-	for (String filename : filenames) {
-	System.out.println("filename : " + filename);
-	}}
-		catch(Exception e) {
-			System.out.println("파일이 없습니다");
-		}
-	}
-	
-	
-	
 	
 	public static void main(String[] args) {	
 		try {
