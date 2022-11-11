@@ -61,13 +61,22 @@ public class ChatServer{
 				}
 			} catch(IOException e) {
 				
+			} catch (NotExistChatRootException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		});
 		thread.start();
 	}
+	
 	//메소드: 클라이언트 연결시 SocketClient 생성 및 추가
-	public void addSocketClient(SocketClient socketClient) {
-		String key = socketClient.chatName + "@" + socketClient.clientIp;
+	public void addSocketClient(SocketClient socketClient) throws server.NotExistChatRootException {
+		if (!chatRooms.containsKey(socketClient.getRoomName())) {
+			throw new NotExistChatRootException();
+		}
+		Map<String, SocketClient> chatRoom = chatRooms.get(socketClient.getRoomName());
+
+		String key = socketClient.getKey();
 		chatRoom.put(key, socketClient);
 		System.out.println("입장: " + key);
 		System.out.println("현재 채팅자 수: " + chatRoom.size() + "\n");
@@ -80,6 +89,7 @@ public class ChatServer{
 		System.out.println("나감: " + key);
 		System.out.println("현재 채팅자 수: " + chatRoom.size() + "\n");
 	}		
+	
 	//메소드: 모든 클라이언트에게 메시지 보냄 + 귓속말
 	public void sendToAll(SocketClient sender, String message) {
 		JSONObject root = new JSONObject();
@@ -157,6 +167,10 @@ public class ChatServer{
 			throw new ExistChatRootException();
 		}
 		chatRooms.put(socketClient.getRoomName(), new HashMap<>());
+		
+		chatRoom.put(socketClient.uid, socketClient);
+		
+		
 		// 폴더 생성
 		String path = Env.getWorkPath() + File.separatorChar + String.valueOf(socketClient.getRoomName().hashCode());
 		File chatRoomFileFolder = new File(path);

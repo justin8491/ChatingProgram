@@ -166,7 +166,7 @@ public class ChatClient {
 					chatRoomListRequest(scanner);
 					break;
 				case "3":
-					enterRoomResponse();
+					enterRoom(scanner);
 					break;
 				case "4":
 					memberRepository.detail();

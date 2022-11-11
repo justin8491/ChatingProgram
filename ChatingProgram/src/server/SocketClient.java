@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
 
@@ -22,6 +23,7 @@ import lombok.Builder;
 import lombok.Data;
 import member.Member;
 import member.MemberRepositoryDB;
+import server1.NotExistChatRootException;
 
 @Data
 public class SocketClient {
@@ -36,7 +38,7 @@ public class SocketClient {
 	private String roomName;
 
 	// 생성자
-	public SocketClient(ChatServer chatServer, Socket socket) {
+	public SocketClient(ChatServer chatServer, Socket socket) throws NotExistChatRootException {
 		try {
 			this.chatServer = chatServer;
 			this.socket = socket;
@@ -68,13 +70,13 @@ public class SocketClient {
 	}
 
 	// 메소드: JSON 받기
-	public void receive() {
+	public void receive() throws NotExistChatRootException {
 		chatServer.threadPool.execute(() -> {
 			try {
 				boolean stop = false;
 				while (true != stop) {
 					String receiveJson = clientDataRead();
-					System.out.println(receiveJson);
+
 					JSONObject jsonObject = new JSONObject(receiveJson);
 					String command = jsonObject.getString("command");
 
@@ -85,41 +87,53 @@ public class SocketClient {
 					 * 
 					 */
 					switch (command) {
-//					case "login":
-//						login(jsonObject);
-//						stop = true;
-//						break;
-					case "passwdSearch":
-						passwdSearch(jsonObject);
+					case "login":
+						login(jsonObject);
 						stop = true;
 						break;
+						
+                    case "registerMember":
+                        registerMember(jsonObject);
+                        stop = true;
+                        break;
+                        
+                    case "passwdSearch":
+                        passwdSearch(jsonObject);
+                        stop = true;
+                        break;
+						
 					case "updateMember":
 						updateMember(jsonObject);
 						stop = true;
 						break;
-
-					case "registerMember":
-						registerMember(jsonObject);
-						stop = true;
-						break;
-
+					
+                    case "createChatRoom":
+                        this.roomName = jsonObject.getString("roomName");
+                        createChatRoom(jsonObject);
+                        stop = true;
+                        break;
+                        
+                    case "chatRoomListRequest":
+                        chatRoomListRequest(jsonObject);
+                        stop = true;
+                        break;
+                        
 					case "incoming":
-						this.chatName = jsonObject.getString("data");
-						chatServer.sendToAll(this, "들어오셨습니다.");
-						chatServer.addSocketClient(this);
+                        this.uid = jsonObject.getString("uid");
+                        this.roomName = jsonObject.getString("roomName");
+                        try {
+                            chatServer.sendToAll(this, "들어오셨습니다.");
+                            chatServer.addSocketClient(this);
+                        } catch (NotExistChatRootException e) {
+                            e.printStackTrace();
+                        }
 						break;
 					case "message":
-						String message = jsonObject.getString("data");
-						chatServer.sendToAll(this, message);
-						break;
-					case "createChatRoom":
-						this.roomName = jsonObject.getString("roomName");
-						createChatRoom(jsonObject);
-						stop = true;
-						break;
-					case "chatRoomListRequest":
-						chatRoomListRequest(jsonObject);
-						stop = true;
+                        try {
+                            chatServer.sendToAll(this, jsonObject.getString("data"));
+                        } catch (NotExistChatRootException e) {
+                            e.printStackTrace();
+                        }
 						break;
 					}
 
@@ -130,6 +144,37 @@ public class SocketClient {
 				chatServer.removeSocketClient(this);
 			}
 		});
+	}
+
+	private void login(JSONObject jsonObject) {
+		String uid = jsonObject.getString("uid");
+		String pwd = jsonObject.getString("pwd");
+		JSONObject jsonResult = new JSONObject();
+		
+		jsonResult.put("statusCode", "-1");
+		jsonResult.put("message", "로그인 아이디가 존재하지 않습니다");
+		
+		try {
+			Member member = chatServer.findByUid(uid);
+			if (null != member && pwd.equals(member.getPwd())) {
+			    if (member.getLoginDateTime() == null) {
+    			    member.setLoginDateTime(LocalDateTime.now());
+    				jsonResult.put("statusCode", "0");
+                    jsonResult.put("member", member.getJsonObject());
+                    jsonResult.put("message", "로그인 성공");
+			    } else {
+                    jsonResult.put("statusCode", "0");
+                    jsonResult.put("member", member.getJsonObject());
+                    jsonResult.put("message", "이미 로그인 된 계정입니다");
+			    }
+			}
+		} catch (Member.NotExistUidPwd e) {
+			e.printStackTrace();
+		}
+
+		send(jsonResult.toString());
+		
+		close();
 	}
 
 	private void registerMember(JSONObject jsonObject) {
@@ -151,7 +196,6 @@ public class SocketClient {
 
 		close();
 	}
-
 
 	private void passwdSearch(JSONObject jsonObject) {
 		String uid = jsonObject.getString("uid");
@@ -198,7 +242,6 @@ public class SocketClient {
 
 	}
 
-	
 	/**
 	 * Chat Room 1. 생성 2. 목록 3. 입장
 	 * 
@@ -227,8 +270,8 @@ public class SocketClient {
 
 		JSONObject jsonResult = new JSONObject();
 
-        jsonResult.put("statusCode", "0");
-        jsonResult.put("message", "채팅방 목록 조회");
+		jsonResult.put("statusCode", "0");
+		jsonResult.put("message", "채팅방 목록 조회");
 		jsonResult.put("chatRooms", chatRoomList);
 
 		send(jsonResult.toString());
