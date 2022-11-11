@@ -107,6 +107,7 @@ public class SocketClient {
 						break;
 
 					case "createChatRoom":
+						
 						this.roomName = jsonObject.getString("roomName");
 						createChatRoom(jsonObject);
 						stop = true;
@@ -118,6 +119,7 @@ public class SocketClient {
 						break;
 
 					case "incoming":
+						System.out.println("receiveJson : " + receiveJson);
 						this.uid = jsonObject.getString("uid");
 						this.roomName = jsonObject.getString("roomName");
 						try {
@@ -187,14 +189,17 @@ public class SocketClient {
 
 		try {
 			Member member = chatServer.findByUid(uid);
+			
 			if (null != member && pwd.equals(member.getPwd())) {
 				jsonResult.put("statusCode", "0");
 				jsonResult.put("message", "로그인 성공");
+				
 			}
+			
 		} catch (Member.NotExistUidPwd e) {
 			e.printStackTrace();
 		}
-
+		
 		send(jsonResult.toString());
 
 		close();
@@ -392,7 +397,10 @@ public class SocketClient {
 	// 메소드: JSON 보내기
 	public void send(String json) {
 		try {
-			dos.writeUTF(json);
+			
+			byte [] data = json.getBytes("UTF8"); 
+			dos.writeInt(data.length);
+			dos.write(data);
 			dos.flush();
 		} catch (IOException e) {
 		}

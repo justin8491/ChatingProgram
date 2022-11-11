@@ -12,10 +12,10 @@ import client.Env;
 import member.Member.ExistMember;
 import member.Member.NotExistUidPwd;
 
-public class MemberRepositoryDB implements MemberRepositoryForDB {
+public class MemberRepositoryDB {
 	Connection conn = null;
 	PreparedStatement pstmt = null;
-	ChatClient chatClient = new ChatClient();
+	ChatClient chatClient;
 	Scanner scanner = new Scanner(System.in);
 
 	public void open() {
@@ -38,11 +38,10 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 	 * @param scanner String exist = member.getExist(); if(exist.equals("0")){...}
 	 *                // 회원 = 1, 회원탈퇴 = 0
 	 */
-	public synchronized void login(Scanner scanner) {
+	public synchronized void login(Member member) {
 		try {
 			System.out.println("로그인 진입");
 			MemberRepositoryDB memberrepository = new MemberRepositoryDB();
-			Member member = new Member();
 			open();
 			System.out.println("\n1. 로그인 작업");
 			System.out.print("아이디 : ");
@@ -453,7 +452,6 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 		}
 	}
 
-	@Override
 	public void detail() {
 		try {
 			open();
@@ -494,7 +492,6 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 		// findByUidTest();
 	}
 
-	@Override
 	public void insertTest(Scanner scanner, Member member) throws ExistMember {
 
 	}

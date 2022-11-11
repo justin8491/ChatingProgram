@@ -133,8 +133,8 @@ public class ChatServer{
 	}
 	
 	
-	public void login(String uid) throws NotExistUidPwd {
-		// TODO Auto-generated method stub
+	public void login(Member member) throws NotExistUidPwd {
+		memberRepository.login(member);
 		
 	}
 	
