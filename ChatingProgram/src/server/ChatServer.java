@@ -30,8 +30,8 @@ public class ChatServer{
 	static //필드
 	ServerSocket serverSocket;
 	ExecutorService threadPool = Executors.newFixedThreadPool(100);
-	Map<String, Map<String, SocketClient>> chatRooms;
-	Map<String, SocketClient> chatRoom = Collections.synchronizedMap(new HashMap<>());
+	Map<String, Map<String, SocketClient>> chatRooms = new HashMap<>();
+	//Map<String, SocketClient> chatRoom = Collections.synchronizedMap(new HashMap<>());
 	MemberRepositoryDB memberRepository = new MemberRepositoryDB();
 	
 	
@@ -40,12 +40,10 @@ public class ChatServer{
 		return chatRooms.keySet().stream().toList();
 	}
 	
+	
+	
 	//메소드: 서버 시작
 	public void start() throws IOException {
-		
-		//멤버 로드
-		//memberRepository.loadMember();
-		
 		serverSocket = new ServerSocket(50001);	
 		System.out.println( "[서버] 시작됨test");
 		
@@ -62,27 +60,34 @@ public class ChatServer{
 		thread.start();
 	}
 	//메소드: 클라이언트 연결시 SocketClient 생성 및 추가
-	public void addSocketClient(SocketClient socketClient) {
-		String key = socketClient.chatName + "@" + socketClient.clientIp;
+	public void addSocketClient(SocketClient socketClient) throws NotExistChatRootException {
+		Map<String, SocketClient> chatRoom = chatRooms.get(socketClient.getRoomName());
+		
+		String key = socketClient.getKey();
 		chatRoom.put(key, socketClient);
+
 		System.out.println("입장: " + key);
 		System.out.println("현재 채팅자 수: " + chatRoom.size() + "\n");
 	}
 
 	//메소드: 클라이언트 연결 종료시 SocketClient 제거
-	public void removeSocketClient(SocketClient socketClient) {
-		String key = socketClient.chatName + "@" + socketClient.clientIp;
+	public void removeSocketClient(SocketClient socketClient) throws NotExistChatRootException  {
+		Map<String, SocketClient> chatRoom = chatRooms.get(socketClient.getRoomName());
+		
+		String key = socketClient.getKey();
 		chatRoom.remove(key);
 		System.out.println("나감: " + key);
 		System.out.println("현재 채팅자 수: " + chatRoom.size() + "\n");
 	}		
 	//메소드: 모든 클라이언트에게 메시지 보냄 + 귓속말
-	public void sendToAll(SocketClient sender, String message) {
+	public void sendToAll(SocketClient sender, String message) throws NotExistChatRootException  {
 		JSONObject root = new JSONObject();
+		Map<String, SocketClient> chatRoom = chatRooms.get(sender.getRoomName());
 		
 		
 		// 귓속말 조건
 		if(message.indexOf("/") == 0) {
+
 			int pos = message.indexOf(" ");
 			String key = message.substring(1, pos); // chatName 타겟 키
 			message = "(귓)" + message.substring(pos+1);
@@ -120,7 +125,9 @@ public class ChatServer{
 		try {
 			serverSocket.close();
 			threadPool.shutdownNow();
-			chatRoom.values().stream().forEach(sc -> sc.close());
+			chatRooms.values().stream().forEach(
+				root -> root.values().stream().forEach(sc -> sc.close())
+			);
 			System.out.println( "[서버] 종료됨 ");
 		} catch (IOException e1) {}
 	}
@@ -149,10 +156,12 @@ public class ChatServer{
 	}
 	
 	public void addChatRoom(SocketClient socketClient) throws ExistChatRootException {
+		
 		if (chatRooms.containsKey(socketClient.getRoomName())) {
 			throw new ExistChatRootException();
 		}
 		chatRooms.put(socketClient.getRoomName(), new HashMap<>());
+		
 		// 폴더 생성
 		String path = Env.getWorkPath() + File.separatorChar + String.valueOf(socketClient.getRoomName().hashCode());
 		File chatRoomFileFolder = new File(path);
@@ -162,12 +171,7 @@ public class ChatServer{
 		}
 
 	}
-	
-	
-	
-	
 
-	
 	public static void main(String[] args) {	
 		try {
 			ChatServer chatServer = new ChatServer();

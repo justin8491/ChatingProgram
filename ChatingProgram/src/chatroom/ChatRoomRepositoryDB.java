@@ -53,18 +53,16 @@ public class ChatRoomRepositoryDB implements ChatRoomRepositoryforDB {
 
 	// 생성
 	@Override
-	public synchronized void createChatRoom(Scanner scanner) {
+	public synchronized void createChatRoom(String roomName) {
 		try {
 			open();
-
+			System.out.println(roomName);
 			pstmt = conn.prepareStatement(Env.getProperty("INSERT_ROOM"));
 
-			System.out.println("\n1. 채팅방 생성");
-			System.out.print("채팅방 : ");
-			String roomName = scanner.nextLine();
 			pstmt.setString(1, roomName);
 			pstmt.executeUpdate();
-
+			
+			if(roomName != null) System.out.println();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("------------- 실패 사유 : " + e.getMessage());
@@ -85,7 +83,7 @@ public class ChatRoomRepositoryDB implements ChatRoomRepositoryforDB {
 			// 멤버 존재여부 확인
 			ResultSet rs = pstmt.executeQuery();
 			int cnt = 0;
-
+			String room_name = null;
 			while (rs.next()) {
 				cnt += 1;
 				System.out.print("# " + cnt + "\t");
@@ -101,7 +99,7 @@ public class ChatRoomRepositoryDB implements ChatRoomRepositoryforDB {
 				System.out.println();
 			}
 
-			// throw new Room.NotExistRoom("[" + room_name + "] 의 정보가 존재하지 않습니다");
+			 //throw new Room.NotExistRoom("채팅방이 존재하지 않습니다. 채팅방을 생성해주세요.");
 
 		} catch (Exception e) {
 			e.printStackTrace();

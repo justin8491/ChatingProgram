@@ -88,6 +88,7 @@ public class ChatClient {
 
 	// 메소드: 서버 연결 종료
 	public void disconnect() throws IOException {
+		System.out.println("서버 연결 종료");
 		socket.close();
 	}
 
@@ -150,14 +151,14 @@ public class ChatClient {
 				String menuNum = scanner.nextLine();
 				switch (menuNum) {
 				case "1":
-					// createChatRoom(scanner);
-					chatRoomRepository.createChatRoom(scanner);
+					createChatRoom(scanner);
+					//chatRoomRepository.createChatRoom(scanner);
 					break;
 				case "2":
-					chatRoomRepository.chatRoomListRequest();
+					//chatRoomRepository.chatRoomListRequest();
+					chatRoomListRequest(scanner);
 					break;
 				case "3":
-					enterRoomResponse();
 					break;
 				case "4":
 					memberRepository.detail();
@@ -220,6 +221,7 @@ public class ChatClient {
 				chatClient.send(jsonObject.toString());
 			}
 		}
+		socket.close();
 	}
 
 	private void updateMember(Scanner scanner) {
@@ -289,27 +291,32 @@ public class ChatClient {
 	private void createChatRoom(Scanner scanner) {
 		try {
 			MemberRepositoryDB memberRepository = new MemberRepositoryDB();
-			ChatRoomRepositoryDB chatRoomRepository = new ChatRoomRepositoryDB();
-			memberRepository.open();
-
+			
 			System.out.println("\n1. 채팅방 생성");
 			System.out.print("채팅방 : ");
 			roomName = scanner.nextLine();
-			member = memberRepository.findByUid(logon.getUid());
+			
 
 			connect();
-
+			
+			member = memberRepository.findByName(chatName);
+			System.out.println("------------" + member.getUid());
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("command", "createChatRoom");
 			jsonObject.put("uid", member.getUid());
 			jsonObject.put("roomName", roomName);
-
 			send(jsonObject.toString());
 
 			createChatRoomResponse();
-
+			
+			
+			
+//			ChatRoomRepositoryDB chatRoomRepository = new ChatRoomRepositoryDB();
+//			chatRoomRepository.createChatRoom(roomName);
+//			
+			
 			disconnect();
-
+			
 			enterRoom(scanner);
 
 		} catch (Exception e) {
@@ -379,7 +386,11 @@ public class ChatClient {
 		}
 
 		disconnect();
+	
+		System.out.println(chatRooms);
 	}
+	
+	
 
 	private void displayChattingRoomList() {
 		int idx = 1;
@@ -401,7 +412,7 @@ public class ChatClient {
 
 			displayChattingRoomList();
 			if (chatRooms.size() == 0) {
-				return;
+				return ;
 			}
 
 			System.out.print("입장할 채팅방 번호 : ");
@@ -410,7 +421,7 @@ public class ChatClient {
 			if (isChekeRoomNum(roomNum)) {
 				System.out.print("채팅방 번호를 잘못 입력하셨습니다");
 
-				return;
+				return ;
 			}
 
 			roomName = getRoomName(roomNum);
@@ -426,18 +437,25 @@ public class ChatClient {
 
 	private void enterRoom(Scanner scanner) {
 		try {
-
+			String roomName;
+			System.out.println("입장을 원하는 채팅방 이름 : ");
+			roomName = scanner.nextLine();
+			
+			//MemberRepositoryDB memberRepository = new MemberRepositoryDB();
 			connect();
-
+			
+			//member = memberRepository.findByName(chatName);
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("command", "incoming");
-			jsonObject.put("uid", logon.getUid());
+			jsonObject.put("uid", member.getUid());
 			jsonObject.put("roomName", roomName);
 
 			send(jsonObject.toString());
 
+			System.out.println("enterRoomResponse() 호출전 ");
 			enterRoomResponse();
 
+			System.out.println("chatJoin() 호출전 ");
 			chatJoin();
 
 		} catch (Exception e) {
