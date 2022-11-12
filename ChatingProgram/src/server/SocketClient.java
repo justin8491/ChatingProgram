@@ -68,6 +68,14 @@ public class SocketClient {
 		return new String(data, "UTF8");
 	}
 
+	public String getRoomName() {
+		return roomName;
+	}
+
+	public void setRoomName(String roomName) {
+		this.roomName = roomName;
+	}
+
 	// 메소드: JSON 받기
 	public void receive() {
 		chatServer.threadPool.execute(() -> {
@@ -413,4 +421,6 @@ public class SocketClient {
 		} catch (Exception e) {
 		}
 	}
+
+
 }

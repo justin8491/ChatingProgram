@@ -14,8 +14,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import member.Env;
+import client.Env;
 import member.Member;
+
 import lombok.Data;
 
 enum CommandType {
@@ -29,19 +30,20 @@ class Message {
 	private String message;
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	private Date createDate;
-	
-	private Message(CommandType commandType, String message) {
-		this.commandType = commandType;
+	private String roomName;
+	private Message(CommandType commandType, String message, String roomName) {
+		this.setCommandType(commandType);
 		this.message = message;
 		this.createDate = new Date(Calendar.getInstance().getTime().getTime());
+		this.roomName=roomName;
 	}
 	
-	static Message of(String message) {
-		return new Message(CommandType.NORMAL_CMD, message);
+	static Message of(String message,String roomName) {
+		return new Message(CommandType.NORMAL_CMD, message, roomName);
 	}
 	
 	static Message exitMessage() {
-		return new Message(CommandType.EXIT_CMD, "");
+		return new Message(CommandType.EXIT_CMD, "", "");
 	}
 	
 	public String getMessageStr() {
@@ -55,8 +57,20 @@ class Message {
 	public String getMessage() {
 		return message;
 	}
+	public String getRoomName() {
+		return roomName;
+	}
+
+	public CommandType getCommandType() {
+		return commandType;
+	}
+
+	public void setCommandType(CommandType commandType) {
+		this.commandType = commandType;
+	}
 }
 
+//Consumer ( 소비자 )
 public class Logger implements Runnable {
   private LinkedBlockingQueue<Message> queue;
   private PrintStream out;
@@ -87,8 +101,10 @@ public class Logger implements Runnable {
         	  if (msg.getCommandType() == CommandType.EXIT_CMD) {
         		  break;
         	  }
+              //System.out.println(name + " : " + msg);
         	  out.println(msg.getMessageStr());
         	  if (this.dbWrite) {
+	        	  //DB에 기록
 	        	  writeLogDB(msg);
         	  }
         	  try {
@@ -107,8 +123,8 @@ public class Logger implements Runnable {
       }
   }
   
-  public void write(String msg) {
-	  queue.offer(Message.of(msg));
+  public void write(String msg,String roomName) {
+	  queue.offer(Message.of(msg,roomName));
   }
   
   public void endLogger() {
@@ -147,8 +163,10 @@ public class Logger implements Runnable {
 	
 	private void writeLogDB(Message message) {
 		try {
+			//로그 정보 설정
 			pstmt.setDate(1, message.getCreateDate());
 			pstmt.setString(2, message.getMessage());
+			pstmt.setString(3, message.getRoomName());
 			pstmt.executeUpdate();
 			conn.commit();
 			

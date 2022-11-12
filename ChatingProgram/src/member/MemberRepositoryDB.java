@@ -19,8 +19,7 @@ public class MemberRepositoryDB {
 	PreparedStatement pstmt = null;
 	ChatClient chatClient;
 	Scanner scanner = new Scanner(System.in);
-	static Member loginMember = null;
-	
+
 
 	public void open() {
 		try {
@@ -42,35 +41,7 @@ public class MemberRepositoryDB {
 	 * @param scanner String exist = member.getExist(); if(exist.equals("0")){...}
 	 *                // 회원 = 1, 회원탈퇴 = 0
 	 */
-	public synchronized void login(Member member) {
-		try {
-			System.out.println("로그인 진입");
-			MemberRepositoryDB memberrepository = new MemberRepositoryDB();
-			open();
-			System.out.println("\n1. 로그인 작업");
-			System.out.print("아이디 : ");
-			String uid = scanner.nextLine();
-			System.out.print("비밀번호 : ");
-			String pwd = scanner.next();
-			member = memberrepository.findByUid(uid);
-			loginMember=member;
-			String exist = member.getExist();
-			System.out.println();
-			if (!pwd.equals(member.getPwd()) || exist.equals("0")) {
-				System.out.println("로그인 실패");
-			} else {
-				System.out.println("로그인 성공");
-				ChatClient.chatName = member.getName();
-				chatClient.connect();
-				chatClient.logon = member;
-			}
 
-		} catch (Exception e) {
-			System.out.println("------------- 실패 사유 : " + e.getMessage());
-		} finally {
-			close();
-		}
-	}
 
 	private void close() {
 		try {
@@ -237,7 +208,7 @@ public class MemberRepositoryDB {
 			pstmt.setString(6, member.getUid());
 
 			pstmt.executeUpdate();
-			loginMember=member;
+			ChatClient.logon=member;
 			ChatClient.chatName = member.getName();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -319,7 +290,7 @@ public class MemberRepositoryDB {
 		String address;
 		String phone;
 		MemberRepositoryDB memberRepository = new MemberRepositoryDB();
-		Member member=loginMember;
+		Member member=ChatClient.logon;
 		Scanner sc=new Scanner(System.in);
 		
 		uid = member.getUid();
@@ -510,7 +481,8 @@ public class MemberRepositoryDB {
 		try {
 			open();
 			MemberRepositoryDB memberRepository = new MemberRepositoryDB();
-			Member member = loginMember;
+			Member member = ChatClient.logon;
+			
 			pstmt = conn.prepareStatement(Env.getProperty("DETAIL_MEMBER"));
 			System.out.println("-------------------------------------");
 			System.out.println("	" + member.getName() + " 님의 회원정보");

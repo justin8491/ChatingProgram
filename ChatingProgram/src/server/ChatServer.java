@@ -115,7 +115,7 @@ public class ChatServer{
 			root.put("chatName", sender.chatName);
 			root.put("message", message);
 			String json = root.toString();
-			logger.write(root.toString());
+			logger.write(root.toString(), sender.getRoomName());
 			chatRoom.values().stream()
 			.filter(socketClient -> socketClient != sender)
 			.forEach(socketClient -> socketClient.send(json));
@@ -140,10 +140,7 @@ public class ChatServer{
 	}
 	
 	
-	public void login(Member member) throws NotExistUidPwd {
-		memberRepository.login(member);
-		
-	}
+
 	
 	//메소드 : INSERT
 	public void insertTest(Member member) throws ExistMember {

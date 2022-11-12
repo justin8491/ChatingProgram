@@ -97,7 +97,11 @@ public class ChatClient {
 			System.out.print("비밀번호 : ");
 			pwd = scanner.nextLine();
 			member = memberRepository.findByUid(uid);
-			
+			String exist = member.getExist();
+			System.out.println();
+			if (!pwd.equals(member.getPwd()) || exist.equals("0")) {
+				System.out.println("로그인 실패");
+			} else {
 			
 			connect();
 
@@ -114,7 +118,7 @@ public class ChatClient {
 			loginResponse();
 			
 			disconnect();
-
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -253,6 +257,7 @@ public class ChatClient {
 				System.out.println("3. 채팅방 입장");
 				System.out.println("4. 나의 회원 정보");
 				System.out.println("5. 회원정보수정");
+				System.out.println("6. 채팅로그 검색");
 				System.out.println("q. 로그아웃");
 				System.out.print("메뉴 선택 => ");
 				Scanner scanner = new Scanner(System.in);
@@ -271,7 +276,7 @@ public class ChatClient {
 					memberRepository.detail();
 					break;
 				case "5":
-					updateMember(scanner);
+					memberRepository.updateTest();
 					break;
 				case "Q", "q":
 					System.out.println(chatName + "님 로그아웃 하셨습니다.");
@@ -610,9 +615,6 @@ public class ChatClient {
 					break;
 				case "5":
 					memberRepository.adminLogin();
-					break;
-				case "6":
-					memberRepository.searchLog(scanner);
 					break;
 				case "Q", "q":
 					scanner.close();
