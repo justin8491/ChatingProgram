@@ -16,8 +16,10 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import chatroom.ChatRoomRepositoryDB;
 import client.Env;
 import member.Member;
 import member.Member.ExistMember;
@@ -31,9 +33,10 @@ public class ChatServer{
 	ServerSocket serverSocket;
 	ExecutorService threadPool = Executors.newFixedThreadPool(100);
 	Map<String, Map<String, SocketClient>> chatRooms = new HashMap<>();
-	//Map<String, SocketClient> chatRoom = Collections.synchronizedMap(new HashMap<>());
 	MemberRepositoryDB memberRepository = new MemberRepositoryDB();
+	ChatRoomRepositoryDB chatRoomRepository = new ChatRoomRepositoryDB();
 	
+
 	
 	//채팅방 리스트
 	public List<String> getChatRoomList() {
@@ -65,6 +68,7 @@ public class ChatServer{
 		
 		String key = socketClient.getKey();
 		chatRoom.put(key, socketClient);
+		
 
 		System.out.println("입장: " + key);
 		System.out.println("현재 채팅자 수: " + chatRoom.size() + "\n");

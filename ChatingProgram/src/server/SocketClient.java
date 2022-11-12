@@ -368,13 +368,11 @@ public class SocketClient {
 
 		JSONObject jsonResult = new JSONObject();
 
-//        jsonResult.put("statusCode", "0");
-//        jsonResult.put("message", "채팅방 목록 조회");
 		jsonResult.put("chatRooms", chatRoomList);
 		if(chatRoomList != null && chatRoomList.size() != 0) {
 			send(jsonResult.toString());
 		} else {
-			System.out.println("size 에러");
+			System.out.println("채팅방이 존재 하지 않습니다.");
 		}
 		
 
@@ -388,7 +386,9 @@ public class SocketClient {
 		jsonResult.put("statusCode", "0");
 		jsonResult.put("message", "채팅방 목록 조회");
 		jsonResult.put("chatRooms", chatRoomList);
-
+		System.out.println(jsonResult);
+		
+		
 		send(jsonResult.toString());
 
 		close();
