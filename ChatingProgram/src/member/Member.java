@@ -29,22 +29,22 @@ public class Member implements Serializable{
 	{	
 		super();
 		this.uid = uid;
-		this.pwd = pwd;
-		this.name = name;
-		this.phone = phone;
-		this.sex = sex;
-		this.address = address;
-		this.exist=exist;
+		this.setPwd(pwd);
+		this.setName(name);
+		this.setPhone(phone);
+		this.setSex(sex);
+		this.setAddress(address);
+		this.setExist(exist);
 	}
 	// Member 생성자를 this를 사용하여 초기화 해주었습니다.
 
 	public Member(JSONObject jsonObject) {
 		uid = jsonObject.getString("uid");
-		pwd = jsonObject.getString("pwd");
-		name = jsonObject.getString("name");
-		sex = jsonObject.getString("sex");
-		phone = jsonObject.getString("phone");
-		address = jsonObject.getString("address");
+		setPwd(jsonObject.getString("pwd"));
+		setName(jsonObject.getString("name"));
+		setSex(jsonObject.getString("sex"));
+		setPhone(jsonObject.getString("phone"));
+		setAddress(jsonObject.getString("address"));
 	}
 	
 	public Member(){}
@@ -66,6 +66,60 @@ public class Member implements Serializable{
 	}
 	
 	
+	public String getPwd() {
+		return pwd;
+	}
+
+	public void setPwd(String pwd) {
+		this.pwd = pwd;
+	}
+
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+
+	public String getSex() {
+		return sex;
+	}
+
+	public void setSex(String sex) {
+		this.sex = sex;
+	}
+
+
+	public String getExist() {
+		return exist;
+	}
+
+	public void setExist(String exist) {
+		this.exist = exist;
+	}
+
+
 	public static class ExistMember extends Exception {
 		public ExistMember(String reason) {
 			super(reason);
@@ -82,6 +136,16 @@ public class Member implements Serializable{
 		public NotExistUidPwd(String reason) {
 			super(reason);
 		}
+	}
+
+	public void setUid( String uid) {
+		this.uid = uid;
+		
+	}
+
+	public String getUid() {
+		// TODO Auto-generated method stub
+		return uid;
 	}
 
 
