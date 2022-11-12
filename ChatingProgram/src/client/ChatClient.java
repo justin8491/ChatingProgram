@@ -1,27 +1,18 @@
 package client;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Base64;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
-
-import org.json.JSONArray;
 import org.json.JSONObject;
 
+import chatroom.ChatRoomRepositoryDB;
 import member.Member;
-import member.Member.ExistMember;
-import member.Member.NotExistUidPwd;
 import member.MemberRepositoryDB;
-import member.MemberRepositoryForDB;
 
 public class ChatClient {
 	// 필드
@@ -29,14 +20,22 @@ public class ChatClient {
 	DataInputStream dis;
 	DataOutputStream dos;
 	public static String chatName;
-	
-	//객체 필드
+	String roomName;
+
+	// 객체 필드
 	static ChatClient chatClient = new ChatClient();
-	Scanner scanner = new Scanner(System.in);
+	//static Scanner scanner;
+	static Scanner scanner = new Scanner(System.in);
 	Member member = new Member();
 
-	// 로그인 여부
-	public static boolean logon = false;
+//	public ChatClient(){
+//		scanner = new Scanner(System.in);
+//	}
+	// 로그인 멤버 객체 값
+	public static Member logon = null;
+
+	// 채팅방 정보 JSON 구조 ({no : 채팅방번호, roomName : "채팅방이름"})
+	static List<String> chatRooms = new ArrayList<String>();
 
 	// UI 반복문 여부
 	static boolean stop = false;
@@ -54,12 +53,12 @@ public class ChatClient {
 		Thread thread = new Thread(() -> {
 			try {
 				while (true) {
-					String json = dis.readUTF();
+					String json = serverDataRead();
 					JSONObject root = new JSONObject(json);
 					String clientIp = root.getString("clientIp");
 					String chatName = root.getString("chatName");
 					String message = root.getString("message");
-					System.out.println("<" + chatName + "@" + clientIp + "> " + message);
+					System.out.println("<" + chatName + "> " + message);
 				}
 			} catch (Exception e1) {
 				System.out.println("[클라이언트] 서버 연결 끊김");
@@ -70,15 +69,134 @@ public class ChatClient {
 	}
 
 	// 메소드: JSON 보내기
-	public void send(JSONObject json) throws IOException {
-		dos.writeUTF(json.toString());
+	public void send(String json) throws IOException {
+		byte[] data = json.getBytes("UTF8");
+
+		dos.writeInt(data.length);// 문자열의 길이(4byte)
+		dos.write(data);// 내용
 		dos.flush();
 	}
 
 	// 메소드: 서버 연결 종료
 	public void disconnect() throws IOException {
+		System.out.println("서버 연결 종료");
 		socket.close();
 	}
+
+	public void login(Scanner scanner) {
+		try {
+			scanner = new Scanner(System.in);
+			MemberRepositoryDB memberRepository = new MemberRepositoryDB();
+			
+			String uid;
+			String pwd;
+
+			System.out.println("\n1. 로그인 작업");
+			System.out.print("아이디 : ");
+			uid = scanner.nextLine();
+			System.out.print("비밀번호 : ");
+			pwd = scanner.nextLine();
+			member = memberRepository.findByUid(uid);
+			
+			
+			connect();
+
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("command", "login");
+			jsonObject.put("uid", uid);
+			jsonObject.put("pwd", pwd);
+			
+			logon = member;
+			chatName = member.getName();
+			
+			send(jsonObject.toString());
+			
+			loginResponse();
+			
+			disconnect();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void loginResponse() throws Exception {
+		String json = serverDataRead();
+		
+		JSONObject root = new JSONObject(json);
+		String statusCode = root.getString("statusCode");
+		String message = root.getString("message");
+		if (statusCode.equals("0")) {
+			System.out.println("로그인 성공");
+			
+		} else {
+			System.out.println(message);
+		}
+	}
+
+	public void registerMember(Scanner scanner) {
+		
+		String uid;
+		String pwd;
+		String name;
+		String sex;
+		String address;
+		String phone;
+		
+		try {
+			System.out.print("아이디 : ");
+			uid = scanner.nextLine();
+
+			// 호출 닉네임 저장
+
+			System.out.print("비번 : ");
+			pwd = scanner.nextLine();
+			System.out.print("이름 : ");
+			name = scanner.nextLine();
+			System.out.print("성별[남자(M)/여자(F)] : ");
+			sex = scanner.nextLine();
+			System.out.print("주소 : ");
+			address = scanner.nextLine();
+			System.out.print("전화번호 : ");
+			phone = scanner.nextLine();
+
+			connect();
+			
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("command", "registerMember");
+			jsonObject.put("uid", uid);
+			jsonObject.put("pwd", pwd);
+			jsonObject.put("name", name);
+			jsonObject.put("sex", sex);
+			jsonObject.put("address", address);
+			jsonObject.put("phone", phone);
+			jsonObject.put("exist", "1");
+			send(jsonObject.toString());
+			
+			registerMemberResponse();
+
+			disconnect();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void registerMemberResponse() throws Exception, NoClassDefFoundError, IOException {
+		String json = serverDataRead();
+		JSONObject root = new JSONObject(json);
+		String statusCode = root.getString("statusCode");
+		String message = root.getString("message");
+		if (statusCode.equals("0")) {
+			System.out.println("회원가입 성공");
+
+		} else {
+			System.out.println(message);
+			System.out.println("회원가입 실패");
+		}
+	}
+	
+	
 	public void passwdSearch(Scanner scanner) {
 		try {
 			String uid;
@@ -88,14 +206,15 @@ public class ChatClient {
 			uid = scanner.nextLine();
 
 			connect();
-			
+
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("command", "passwdSearch");
 			jsonObject.put("uid", uid);
-			send(jsonObject);
+
+			send(jsonObject.toString());
 
 			passwdSearchResponse();
-			
+
 			disconnect();
 
 		} catch (Exception e) {
@@ -104,7 +223,7 @@ public class ChatClient {
 	}
 
 	public void passwdSearchResponse() throws Exception {
-		String json = dis.readUTF();
+		String json = serverDataRead();
 		JSONObject root = new JSONObject(json);
 		String statusCode = root.getString("statusCode");
 		String message = root.getString("message");
@@ -115,76 +234,74 @@ public class ChatClient {
 			System.out.println(message);
 		}
 	}
-	
-	
-	public void loginSucessMenu() {
+
+	public void loginSucessMenu() throws EOFException {
 		stop = false;
 		try {
 			MemberRepositoryDB memberRepository = new MemberRepositoryDB();
-			while (false == stop && logon == true) {
+			
+			//Member nameKey = memberRepository.findByName(chatName);
+			while (false == stop && logon != null) {
+				
+				
 				System.out.println("-------------------------------------");
 				System.out.println("	" + chatName + " 님 환영합니다.");
 				System.out.println("-------------------------------------");
 				System.out.println();
-				System.out.println("1. 채팅방 입장");
-				System.out.println("2. 나의 회원 정보");
-				System.out.println("3. 회원정보수정");
-				System.out.println("4. 파일 업로드");
-				System.out.println("5. 파일 목록 조회");
-				System.out.println("6. 파일 다운로드");
-				System.out.println("q. 프로그램 종료");
+				System.out.println("1. 채팅방 생성");
+				System.out.println("2. 채팅방 목록");
+				System.out.println("3. 채팅방 입장");
+				System.out.println("4. 나의 회원 정보");
+				System.out.println("5. 회원정보수정");
+				System.out.println("q. 로그아웃");
 				System.out.print("메뉴 선택 => ");
 				Scanner scanner = new Scanner(System.in);
 				String menuNum = scanner.nextLine();
 				switch (menuNum) {
 				case "1":
-					chatClient.chatJoin();
+					createChatRoom(scanner);
 					break;
 				case "2":
-					memberRepository.detail(scanner, chatClient);
+					chatRoomListRequest(scanner);
 					break;
 				case "3":
-//					chatClient.updateMember(scanner);
-					memberRepository.updateTest();
+					enterRoom(scanner);
 					break;
 				case "4":
-					chatClient.fileUpload(scanner);
+					memberRepository.detail();
 					break;
 				case "5":
-					chatClient.fileListRequest(scanner);
-					break;
-				case "6":
-					chatClient.fileDownload(scanner);
+					updateMember(scanner);
 					break;
 				case "Q", "q":
-					scanner.close();
-					stop = true;
-					System.out.println("프로그램 종료됨");
+					System.out.println(chatName + "님 로그아웃 하셨습니다.");
+					logon = null;
+					mainMenu();
 					break;
 				}
+				
 			}
-
+		
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("[클라이언트] 서버 연결 안됨");
 		}
 	}
-	
-	
-	
-	
+
 	private void chatJoin() {
 		try {
 			// 채팅 연결
-			chatClient.connect();
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("command", "incoming");
-			jsonObject.put("data", chatName);
+			//this.serverDataRead();
+			System.out.println("[" + roomName + "]" + " 채팅방 입장");
+//			JSONObject jsonObject = new JSONObject();
+//			jsonObject.put("command", "incoming");
+//			jsonObject.put("uid", member.getUid());
+//			jsonObject.put("roomName", roomName);
 
-			chatClient.send(jsonObject);
-			
-			chatClient.receive();
-			
+//			send(jsonObject.toString());
+
+			//receive(); 
+
 			System.out.println("--------------------------------------------------");
 			System.out.println("보낼 메시지를 입력하고 Enter");
 			System.out.println("채팅를 종료하려면 q를 입력하고 Enter");
@@ -193,7 +310,7 @@ public class ChatClient {
 			
 			
 			scanner.close();
-			chatClient.disconnect();
+			disconnect();
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("[클라이언트] 서버 연결 안됨");
@@ -212,11 +329,13 @@ public class ChatClient {
 				jsonObject = new JSONObject();
 				jsonObject.put("command", "message");
 				jsonObject.put("data", message);
-				chatClient.send(jsonObject);
+				send(jsonObject.toString());
 			}
 		}
+		scanner.close();
+		loginSucessMenu();
 	}
-	
+
 	private void updateMember(Scanner scanner) {
 		String uid;
 		String pwd;
@@ -250,7 +369,7 @@ public class ChatClient {
 			jsonObject.put("sex", sex);
 			jsonObject.put("address", address);
 			jsonObject.put("phone", phone);
-			send(jsonObject);
+			send(jsonObject.toString());
 
 			updateMemberResponse();
 
@@ -262,7 +381,7 @@ public class ChatClient {
 	}
 
 	public void updateMemberResponse() throws Exception {
-		String json = dis.readUTF();
+		String json = serverDataRead();
 		JSONObject root = new JSONObject(json);
 		String statusCode = root.getString("statusCode");
 		String message = root.getString("message");
@@ -274,150 +393,190 @@ public class ChatClient {
 		}
 	}
 
-	private void fileListRequest(Scanner scanner) {
+	/**
+	 * ✔Room_Management 1. 생성 2. 목록 3. 입장
+	 * 
+	 * @param createChatRoom
+	 * 
+	 */
+	// 1. 채팅방 생성
+	private void createChatRoom(Scanner scanner) {
 		try {
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("command", "fileListRequest");
-
-			// 사전에 서버에서 파일 목록을 받을 참조 변수를 null로 초기화 한다
-			fileList = null;
+			
+			System.out.println("\n1. 채팅방 생성");
+			System.out.print("채팅방 : ");
+			roomName = scanner.nextLine();
 
 			connect();
-			send(jsonObject);
 
-			System.out.println("서버에 파일 목록 요청");
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("command", "createChatRoom");
+			jsonObject.put("uid", member.getUid());
+			jsonObject.put("roomName", roomName);
+			send(jsonObject.toString());
 
-			fileListResponse();
+			createChatRoomResponse();
 
-		} catch (UnknownHostException ue) {
-			System.out.println(ue.getMessage());
-		} catch (IOException ie) {
-			System.out.println(ie.getMessage());
+			ChatRoomRepositoryDB chatRoomRepository = new ChatRoomRepositoryDB();
+			chatRoomRepository.createChatRoom(roomName);
+			
+			
+			disconnect();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-
 	}
 
-	JSONArray fileList = null;
-
-	private void fileListResponse() throws IOException {
-		String json = dis.readUTF();
+	private void createChatRoomResponse() throws IOException {
+		String json = serverDataRead();
 		JSONObject root = new JSONObject(json);
 		String statusCode = root.getString("statusCode");
 		String message = root.getString("message");
-		fileList = root.getJSONArray("fileList");
-
+		
+		
 		if (statusCode.equals("0")) {
-			// 파일 목록 출력
-			fileList.forEach(item -> {
-				JSONObject jsonItem = (JSONObject) item;
-				System.out.println(jsonItem.getString("fileName") + " : " + jsonItem.getLong("size"));
-			});
+			System.out.println("정상적으로 채팅방이 생성 되었습니다");
 		} else {
 			System.out.println(message);
 		}
-
+	}
+	
+	
+	//INT형 데이터 변환 후 UTF8 로 변환 => 받는 데이터를 압축 시키기 위함
+	private String serverDataRead() throws IOException {
+        int length = dis.readInt();
+        int pos = 0; 
+        byte [] data = new byte[length];
+        do {
+            int len = dis.read(data, pos, length - pos);
+            pos += len;
+        } while(length != pos);
+        
+        return new String(data, "UTF8");
 	}
 
-	public void fileUpload(Scanner scanner) {
+	// 2. 목록
+	// 챗 룸 리스트 요청
+	public void chatRoomListRequest(Scanner scanner) {
 		try {
-			System.out.println("파일주소를 입력하세요:");
-			String fileName = scanner.next();
-			JSONObject jsonObject = new JSONObject();
-			File file = new File(fileName);
-			if (!file.exists()) {
-				System.out.println("파일이 존재 하지 않습니다");
-				return;
-			}
-			BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
-			byte[] data = new byte[(int) file.length()];
-			in.read(data);
-			in.close();
-			jsonObject.put("command", "fileUpload");
-			jsonObject.put("fileName", file.getName());
-			jsonObject.put("content", new String(Base64.getEncoder().encode(data)));
 
 			connect();
-			send(jsonObject);
 
-			System.out.println("파일전송 완료");
-		} catch (UnknownHostException ue) {
-			System.out.println(ue.getMessage());
-		} catch (IOException ie) {
-			System.out.println(ie.getMessage());
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("command", "chatRoomListRequest");
+
+			send(jsonObject.toString());
+
+			chatRoomListResponse();
+
+			disconnect();
+
+			enterRoomRequest(scanner);
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
-	public void fileDownload(Scanner scanner) throws IOException {
-		try {
-			// 서버에 있는 파일목록 존재 여부 확인
-			if (fileList == null) {
-				System.out.println("서버에 파일목록을 요청하세요");
-				return;
-			}
-			System.out.print("다운로드할 파일명을 입력하세요: ");
-			String fileName = scanner.next();
-
-			// 서버에 있는 파일명 존재 여부 확인
-			boolean isExist = fileList.toList().stream()
-					.anyMatch(item -> ((HashMap<?, ?>) item).get("fileName").equals(fileName));
-			if (false == isExist) {
-				System.out.println("서버에 파일이 존재하지 않습니다");
-				return;
-			}
-			JSONObject jsonObject = new JSONObject();
-
-			jsonObject.put("command", "fileDownload");
-			jsonObject.put("fileName", fileName);
-
-			connect();
-			send(jsonObject);
-
-			fileDownloadResponse(fileName);
-
-		} catch (UnknownHostException ue) {
-			System.out.println(ue.getMessage());
-		} catch (Exception ie) {
-			System.out.println(ie.getMessage());
-		}
-
-	}
-
-	private void fileDownloadResponse(String fileName) throws Exception {
-		String json = dis.readUTF();
+	private void chatRoomListResponse() throws IOException {
+		String json = serverDataRead();
 		JSONObject root = new JSONObject(json);
 		String statusCode = root.getString("statusCode");
 		String message = root.getString("message");
 
 		if (statusCode.equals("0")) {
-			byte[] data = Base64.getDecoder().decode(root.getString("content").getBytes());
-
-			File downloadPath = new File("c:\\down\\client");
-			if (!downloadPath.exists()) {
-				try {
-					downloadPath.mkdir();
-				} catch (Exception e) {
-					e.getStackTrace();
-				}
-			}
-			try {
-				BufferedOutputStream fos = new BufferedOutputStream(
-						new FileOutputStream(new File(downloadPath, fileName)));
-				fos.write(data);
-				fos.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
+			chatRooms.clear();
+			root.getJSONArray("chatRooms").forEach(s -> chatRooms.add((String) s));
 		} else {
 			System.out.println(message);
 		}
+
+		disconnect();
+
+		System.out.println(chatRooms);
 	}
 
-	// 메소드: 메인
-	public static void main(String[] args) {
+	private void displayChattingRoomList() {
+		int idx = 1;
+		System.out.println("----------------");
+		System.out.println("* 채팅방 목록 *");
+		for (String chatRoom : chatRooms) {
+			System.out.println(idx + ". " + chatRoom);
+			idx++;
+		}
+		if (0 == chatRooms.size()) {
+			System.out.println("* 입장 가능한 채팅방이 없습니다. 채팅방 생성을 먼저 생성하세요 *");
+			
+			System.out.println();
+			
+		}
+	}
+
+	// 3. 입장
+	// 입장 할 채팅방 요청
+	private void enterRoomRequest(Scanner scanner) {
+		try {
+			
+			displayChattingRoomList();
+			if (chatRooms.size() == 0) {
+				System.out.println();
+				enterRoom(scanner);
+			} else {
+				return;
+			}
+
+			
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	private void enterRoom(Scanner scanner) {
+		try {
+			String roomName;
+			System.out.println("입장을 원하는 채팅방 이름 : ");
+			roomName = scanner.nextLine();
+			
+			connect();
+
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("command", "incoming");
+			jsonObject.put("uid", member.getUid());
+			jsonObject.put("roomName", roomName);
+			
+			send(jsonObject.toString());
+
+			enterRoomResponse();
+
+			chatJoin();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	private void enterRoomResponse() throws IOException {
+		// 메시지 수신을 위한 스레드 구동
+		receive();
+
+	}
+
+	private boolean isChekeRoomNum(int roomNum) {
+		return (0 >= roomNum || roomNum > chatRooms.size());
+	}
+
+	private String getRoomName(int roomNum) {
+		return chatRooms.get(roomNum - 1);
+	}
+
+	public static void mainMenu() {
 		try {
 			ChatClient chatClient = new ChatClient();
-			MemberRepositoryDB memberRepository=new MemberRepositoryDB();
+			MemberRepositoryDB memberRepository = new MemberRepositoryDB();
 			while (false == stop) {
 				System.out.println();
 				System.out.println("1. 로그인");
@@ -429,18 +588,18 @@ public class ChatClient {
 				System.out.print("메뉴 선택 => ");
 
 				// 스캐너
-				Scanner scanner = new Scanner(System.in);
+
 				String menuNum = scanner.nextLine();
-				
+
 				switch (menuNum) {
 				case "1":
-					memberRepository.login(scanner);
-					if (logon == true) {
+					chatClient.login(scanner);
+					if (logon != null) {
 						stop = true;
 					}
 					break;
 				case "2":
-					memberRepository.insertTest(scanner);
+					chatClient.registerMember(scanner);
 					break;
 				case "3":
 //					chatClient.passwdSearch(scanner);
@@ -463,7 +622,7 @@ public class ChatClient {
 				}
 			}
 			// 로그온이 true 일때 만
-			if (logon)
+			if (logon != null)
 				chatClient.loginSucessMenu();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -471,5 +630,9 @@ public class ChatClient {
 		}
 	}
 
+	// 메소드: 메인
+	public static void main(String[] args) {
+		mainMenu();
+	}
 
 }

@@ -8,15 +8,16 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 import client.ChatClient;
+import client.Env;
 import member.Member;
 import member.Member.ExistMember;
 import member.Member.NotExistUidPwd;
 import member.MemberRepositoryDB;
 
-public class MemberRepositoryDB implements MemberRepositoryForDB {
+public class MemberRepositoryDB {
 	Connection conn = null;
 	PreparedStatement pstmt = null;
-	ChatClient chatClient = new ChatClient();
+	ChatClient chatClient;
 	Scanner scanner = new Scanner(System.in);
 	static Member loginMember = null;
 	
@@ -41,10 +42,10 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 	 * @param scanner String exist = member.getExist(); if(exist.equals("0")){...}
 	 *                // 회원 = 1, 회원탈퇴 = 0
 	 */
-	public synchronized void login(Scanner scanner) {
+	public synchronized void login(Member member) {
 		try {
+			System.out.println("로그인 진입");
 			MemberRepositoryDB memberrepository = new MemberRepositoryDB();
-			Member member = new Member();
 			open();
 			System.out.println("\n1. 로그인 작업");
 			System.out.print("아이디 : ");
@@ -61,7 +62,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 				System.out.println("로그인 성공");
 				ChatClient.chatName = member.getName();
 				chatClient.connect();
-				chatClient.logon = true;
+				chatClient.logon = member;
 			}
 
 		} catch (Exception e) {
@@ -89,9 +90,9 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 
 		try {
 			open();
-
+			
 			pstmt = conn.prepareStatement(Env.getProperty("SELECT_MEMBER"));
-
+			
 			// 멤버 존재여부 확인
 			pstmt.setString(1, member.getUid());
 			ResultSet rs = pstmt.executeQuery();
@@ -505,8 +506,7 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 		}
 	}
 
-	@Override
-	public void detail(Scanner scanner, ChatClient chatClient) throws NotExistUidPwd {
+	public void detail() {
 		try {
 			open();
 			MemberRepositoryDB memberRepository = new MemberRepositoryDB();
@@ -546,7 +546,6 @@ public class MemberRepositoryDB implements MemberRepositoryForDB {
 		// findByUidTest();
 	}
 
-	@Override
 	public void insertTest(Scanner scanner, Member member) throws ExistMember {
 
 	}

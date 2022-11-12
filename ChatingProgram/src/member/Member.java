@@ -1,32 +1,30 @@
 package member;
 
+
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import org.json.JSONObject;
 
 import lombok.Builder;
 import lombok.Data;
-@Builder
+
 @Data
-public class Member implements Serializable{
-	/**
-	 * 
-	 */
+@Builder
+public class Member implements Serializable {
+
 	private static final long serialVersionUID = -7931541991854735188L;
-	
 	private String uid;
 	private String pwd;
 	private String name;
-	private String phone;
 	private String sex;
 	private String address;
+	private String phone;
+	private LocalDateTime loginDateTime;
 	private String exist;
-  	// 각각의 아이디 페스워드는 외부에서 접근할 수 없도록
-  	// 접근제어자 private 을 주어 해당 클레스에서만 접근할 수 있도록 했습니다.
 	
-	public Member(String uid, String pwd, String name, String phone, String sex, String address,String exist) 
-	{	
+	public Member(String uid, String pwd, String name, String sex, String address, String phone, LocalDateTime loginDateTime, String exist) {
 		super();
 		this.uid = uid;
 		this.setPwd(pwd);
@@ -36,10 +34,16 @@ public class Member implements Serializable{
 		this.setAddress(address);
 		this.setExist(exist);
 	}
-	// Member 생성자를 this를 사용하여 초기화 해주었습니다.
-
+	
 	public Member(JSONObject jsonObject) {
 		uid = jsonObject.getString("uid");
+		pwd = jsonObject.getString("pwd");
+		name = jsonObject.getString("name");
+		sex = jsonObject.getString("sex");
+		address = jsonObject.getString("address");
+		phone = jsonObject.getString("phone");
+		exist = jsonObject.getString("exist");
+        loginDateTime = null;
 		setPwd(jsonObject.getString("pwd"));
 		setName(jsonObject.getString("name"));
 		setSex(jsonObject.getString("sex"));
@@ -47,8 +51,10 @@ public class Member implements Serializable{
 		setAddress(jsonObject.getString("address"));
 	}
 	
-	public Member(){}
-	@Override
+	public Member() {
+    }
+
+    @Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -142,13 +148,25 @@ public class Member implements Serializable{
 		this.uid = uid;
 		
 	}
+    public JSONObject getJsonObject() {
+        JSONObject jsonMember = new JSONObject();
+        jsonMember.put("uid", uid);
+        jsonMember.put("pwd", pwd);
+        jsonMember.put("name", name);
+        jsonMember.put("sex", sex);
+        jsonMember.put("address", address);
+        jsonMember.put("phone", phone);
+        jsonMember.put("exist", exist);
+        return jsonMember;
+    }
 
 	public String getUid() {
 		// TODO Auto-generated method stub
 		return uid;
 	}
-
-
+    public boolean login(String uid2, String pwd2) {
+        return uid2.equals(uid) && pwd2.equals(pwd);
+    }
 
 	
 	

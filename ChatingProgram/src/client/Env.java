@@ -1,4 +1,4 @@
-package member;
+package client;
 
 import java.io.IOException;
 import java.util.Properties;
