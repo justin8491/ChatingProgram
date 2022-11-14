@@ -443,7 +443,6 @@ public class ChatClient {
 					memberRepository.insertTest(scanner);
 					break;
 				case "3":
-//					chatClient.passwdSearch(scanner);
 					memberRepository.findPwd();
 					break;
 				case "4":
